@@ -12,6 +12,16 @@ public:
     Resource(const std::string& type, int amount) : type(type), amount(amount) {}
 };
 
+class Building {
+public:
+    std::string type;  // The type of building (e.g. "Barracks", "Farm", etc.)
+    int level;  // The level of the building (e.g. 1, 2, 3, etc.)
+    int cost;  // The cost to build or upgrade the building
+
+    // Constructor for the Building class
+    Building(const std::string& type, int level, int cost) :
+            type(type), level(level), cost(cost) {}
+};
 
 // Full definition of the Troop class
 class Troop {
@@ -47,7 +57,7 @@ public:
     int health;  // The health of the village
     Player* owner;  // Pointer to the player who owns the village
     std::vector<Resource> resources;  // The resources that the village has available
-    std::vector<std::string> buildings;  // The buildings in the village
+    std::vector<Building> buildings;  // The buildings in the village
     std::vector<Troop> troops;  // The troops stationed in the village
     std::vector<std::pair<Player*, std::vector<Troop>>> incomingAttacks_;
 
@@ -174,20 +184,22 @@ public:
         }
 
         // Earn resources according to the village's resource-generating buildings
-        for (const std::string& building : buildings) {
-            if (building == "Farm") {
+        for (const Building& building : buildings) {
+            if (building.type == "Farm") {
                 resources.push_back(Resource("Food", 5));
             }
-            if (building == "Gold Mine") {
+            if (building.type == "Gold Mine") {
                 resources.push_back(Resource("Gold", 2));
             }
-            if (building == "Lumber Mill") {
+            if (building.type == "Lumber Mill") {
                 // Add 1 wood resource to the village's resources
                 resources.push_back(Resource("Wood", 1));
             }
         }
     }
-    
+
+
+
 };
 
 
