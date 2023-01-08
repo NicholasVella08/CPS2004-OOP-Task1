@@ -3,6 +3,14 @@
 #include <algorithm>
 #include <vector>
 
+class Resource {
+public:
+    std::string type; // The type of resource
+    int amount; // The amount of the resource
+
+// Constructor for the Resource class
+    Resource(const std::string& type, int amount) : type(type), amount(amount) {}
+};
 
 
 // Full definition of the Troop class
@@ -27,7 +35,7 @@ class Player {
 public:
     std::string name;  // The name of the player
     std::vector<Troop> troops;
-    std::vector<std::string> resources;
+    std::vector<Resource> resources;
     // Constructor for the Player class
     Player(const std::string& name) : name(name) {}
 };
@@ -38,7 +46,7 @@ public:
     int y;  // The y-coordinate of the village on the map
     int health;  // The health of the village
     Player* owner;  // Pointer to the player who owns the village
-    std::vector<std::string> resources;  // The resources that the village has available
+    std::vector<Resource> resources;  // The resources that the village has available
     std::vector<std::string> buildings;  // The buildings in the village
     std::vector<Troop> troops;  // The troops stationed in the village
     std::vector<std::pair<Player*, std::vector<Troop>>> incomingAttacks_;
@@ -53,12 +61,24 @@ public:
 
     Troop* trainTroop(const std::string& type) {
         // Check if the village has the resources to train the troop
-        if ( std::find (resources.begin(), resources.end(), type) == resources.end()) {
+        bool hasResources = false;
+        for (const Resource& resource : resources) {
+            if (resource.type == type) {
+                hasResources = true;
+                break;
+            }
+        }
+        if (!hasResources) {
             return nullptr;  // Return nullptr if the village doesn't have the resources
         }
+
         // Remove the training resources from the village's resources
-        auto it = std::find(resources.begin(), resources.end(), type);
-        resources.erase(it);
+        for (auto it = resources.begin(); it != resources.end(); ++it) {
+            if (it->type == type) {
+                resources.erase(it);
+                break;
+            }
+        }
 
         // Create the new troop and add it to the village's troops
         Troop* newTroop = new Troop(type, 100, 10, 0, 10);
@@ -148,27 +168,26 @@ public:
 
     // Earn resources according to the village's resource-generating buildings
     void earnResources() {
-        // Iterate through the buildings in the village
+        // Check if the village has any resource-generating buildings
+        if (buildings.empty()) {
+            return;  // No resource-generating buildings, so don't earn any resources
+        }
+
+        // Earn resources according to the village's resource-generating buildings
         for (const std::string& building : buildings) {
-            // Check if the building is a resource-generating building
+            if (building == "Farm") {
+                resources.push_back(Resource("Food", 5));
+            }
             if (building == "Gold Mine") {
-                // Increase the village's gold resources
-                resources.push_back("Gold");
+                resources.push_back(Resource("Gold", 2));
             }
-            else if (building == "Lumber Mill") {
-                // Increase the village's lumber resources
-                resources.push_back("Lumber");
-            }
-            else if (building == "Farm") {
-                // Increase the village's food resources
-                resources.push_back("Food");
+            if (building == "Lumber Mill") {
+                // Add 1 wood resource to the village's resources
+                resources.push_back(Resource("Wood", 1));
             }
         }
     }
-
-
-
-
+    
 };
 
 
