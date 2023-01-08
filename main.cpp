@@ -2,6 +2,10 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
+#include <map>
+const int MAP_WIDTH = 50; // The width of the map (in grid cells)
+const int MAP_HEIGHT = 50; // The height of the map (in grid cells)
+
 
 class Resource {
 public:
@@ -198,28 +202,46 @@ public:
 
 };
 
+
+
+// Full definition of the Map class
 class Map {
 public:
-    Map(int width, int height) : width_(width), height_(height) {
-        // Initialize the map with empty villages
-        map_.resize(width * height);
+// The 2D grid of map cells (each containing a pointer to the village at that location, if any)
+    std::vector<std::vector<Village*>> cells;
+
+// Map from village pointers to the coordinates of the villages on the map
+    std::map<Village*, std::pair<int, int>> villageLocations;
+
+// Default constructor for the Map class
+    Map() {
+        // Initialize the map cells to be empty (i.e. no villages present)
+        cells.resize(MAP_WIDTH);
+        for (int i = 0; i < MAP_WIDTH; i++) {
+            cells[i].resize(MAP_HEIGHT);
+            for (int j = 0; j < MAP_HEIGHT; j++) {
+                cells[i][j] = nullptr;
+            }
+        }
     }
 
-    int width() const { return width_; }
-    int height() const { return height_; }
-
-    Village& findVillage(int x, int y) {
-        return map_[y * width_ + x];
+// Add the given village to the map at the given coordinates
+    void addVillage(Village* village, int x, int y) {
+        cells[x][y] = village;
+        villageLocations[village] = {x, y};
     }
 
-    const Village& findVillage(int x, int y) const {
-        return map_[y * width_ + x];
+// Remove the given village from the map
+    void removeVillage(Village* village) {
+        std::pair<int, int> villageLocation = villageLocations[village];
+        cells[villageLocation.first][villageLocation.second] = nullptr;
+        villageLocations.erase(village);
     }
 
-private:
-    int width_;
-    int height_;
-    std::vector<Village> map_;
+// Check if the given coordinates are within the bounds of the map
+    bool isValidLocation(int x, int y) const {
+        return x >= 0 && x < MAP_WIDTH && y >= 0 && y < MAP_HEIGHT;
+    }
 };
 
 class Game {
@@ -233,7 +255,7 @@ public:
     // Constructor for the Game class
     Game() : currentRound(1), currentTurn(0), winConditionMet(false) {}
 
-    
+
 };
 
 
