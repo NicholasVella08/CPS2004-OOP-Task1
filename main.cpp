@@ -174,8 +174,6 @@ public:
         incomingAttacks_.clear();
     }
 
-
-
     // Earn resources according to the village's resource-generating buildings
     void earnResources() {
         // Check if the village has any resource-generating buildings
@@ -186,23 +184,19 @@ public:
         // Earn resources according to the village's resource-generating buildings
         for (const Building& building : buildings) {
             if (building.type == "Farm") {
-                resources.push_back(Resource("Food", 5));
+                resources.push_back(Resource("Food", 5 * building.level));
             }
             if (building.type == "Gold Mine") {
-                resources.push_back(Resource("Gold", 2));
+                resources.push_back(Resource("Gold", 2 * building.level));
             }
             if (building.type == "Lumber Mill") {
                 // Add 1 wood resource to the village's resources
-                resources.push_back(Resource("Wood", 1));
+                resources.push_back(Resource("Wood", 1 * building.level));
             }
         }
     }
 
-
-
 };
-
-
 
 class Map {
 public:
@@ -227,6 +221,22 @@ private:
     int height_;
     std::vector<Village> map_;
 };
+
+class Game {
+public:
+    std::vector<Player> players;  // Vector of players in the game
+    std::vector<Village> villages;  // Vector of villages in the game
+    int currentRound;  // Current round of the game
+    int currentTurn;  // Current turn within the current round
+    bool winConditionMet;  // Flag for whether the win condition has been met
+
+    // Constructor for the Game class
+    Game() : currentRound(1), currentTurn(0), winConditionMet(false) {}
+
+    
+};
+
+
 
 int main(){
     Village v;
