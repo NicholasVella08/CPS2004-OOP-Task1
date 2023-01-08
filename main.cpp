@@ -55,7 +55,29 @@ public:
     }
 
     // Attack the given village with the given troops
-    void attack(Village& village, const std::vector<Troop>& troops);
+    void attack(Village& village, const std::vector<Troop>& troops) {
+        // Calculate the total attack power of the attacking troops
+        int totalAttackPower = 0;
+        for (const Troop& troop : troops) {
+            totalAttackPower += troop.attack;
+        }
+
+        // Reduce the health of the attacked target by the total attack power
+        village.health = std::max(village.health - totalAttackPower, 0);
+
+        // Check if the attack was successful (health of target village is zero or less)
+        if (village.health <= 0) {
+            // Attack was successful:
+            // Transfer the ownership of the village to the attacker
+            village.owner = owner;
+
+            // Capture any resources in the village
+            resources.insert(resources.end(), village.resources.begin(), village.resources.end());
+
+            // Clear the resources of the captured village
+            village.resources.clear();
+        }
+    }
 
     // Check if the village is under attack by enemy troops
     bool isUnderAttack() const;
