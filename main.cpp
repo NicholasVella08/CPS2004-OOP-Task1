@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <vector>
 
-class Player;  // Forward declaration of the Player class
+
 
 // Full definition of the Troop class
 class Troop {
@@ -22,6 +22,16 @@ public:
 
 };
 
+// Full definition of the Player class
+class Player {
+public:
+    std::string name;  // The name of the player
+    std::vector<Troop> troops;
+    std::vector<std::string> resources;
+    // Constructor for the Player class
+    Player(const std::string& name) : name(name) {}
+};
+
 class Village {
 public:
     int x;  // The x-coordinate of the village on the map
@@ -31,6 +41,8 @@ public:
     std::vector<std::string> resources;  // The resources that the village has available
     std::vector<std::string> buildings;  // The buildings in the village
     std::vector<Troop> troops;  // The troops stationed in the village
+    std::vector<std::pair<Player*, std::vector<Troop>>> incomingAttacks_;
+
 
     // Default constructor for the Village class
     Village() : x(0), y(0), health(0), owner(nullptr) {}
@@ -80,13 +92,80 @@ public:
     }
 
     // Check if the village is under attack by enemy troops
-    bool isUnderAttack() const;
+    bool isUnderAttack() const {
+        // Check if there are any incoming troops that have not yet arrive at the village
+        for(const Troop& troop : troops) {
+            if (troop.marchingSpeed > 0) {
+                return true;  // There is an incoming troop, so the village is under attack
+            }
+        }
+        return false;  // No incoming troops, so the village is not under attack
+    }
 
-    // Resolve any incoming attacks on the village
-    void resolveAttacks();
+
+    void resolveAttacks() {
+        // Check if the village is under attack
+        if (!isUnderAttack()) {
+            return;  // No attacks to resolve
+        }
+
+        // Calculate the total attack power of the defending troops
+        int totalDefendingPower = 0;
+        for (const Troop& troop : troops) {
+            totalDefendingPower += troop.attack;
+        }
+
+        // Loop through all incoming attacks and resolve them one by one
+        for (const auto& attack : incomingAttacks_) {
+            // Calculate the total attack power of the attacking troops
+            int totalAttackingPower = 0;
+            for (const Troop& troop : attack.second) {
+                totalAttackingPower += troop.attack;
+            }
+
+            // Check if the attack was successful (defending power is less than attacking power)
+            if (totalDefendingPower < totalAttackingPower) {
+                // Attack was successful:
+                // Transfer the ownership of the village to the attacker
+                owner = attack.first;
+
+                // Capture any resources in the village
+                attack.first->resources.insert(attack.first->resources.end(), resources.begin(), resources.end());
+
+                // Clear the resources of the captured village
+                resources.clear();
+            }
+
+            // Reduce the health of the defending village by the total attacking power
+            health = std::max(health - totalAttackingPower, 0);
+        }
+
+        // Clear all incoming attacks
+        incomingAttacks_.clear();
+    }
+
+
 
     // Earn resources according to the village's resource-generating buildings
-    void earnResources();
+    void earnResources() {
+        // Iterate through the buildings in the village
+        for (const std::string& building : buildings) {
+            // Check if the building is a resource-generating building
+            if (building == "Gold Mine") {
+                // Increase the village's gold resources
+                resources.push_back("Gold");
+            }
+            else if (building == "Lumber Mill") {
+                // Increase the village's lumber resources
+                resources.push_back("Lumber");
+            }
+            else if (building == "Farm") {
+                // Increase the village's food resources
+                resources.push_back("Food");
+            }
+        }
+    }
+
 
 
 
