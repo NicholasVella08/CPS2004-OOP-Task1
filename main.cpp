@@ -188,19 +188,101 @@ public:
         // Earn resources according to the village's resource-generating buildings
         for (const Building& building : buildings) {
             if (building.type == "Farm") {
-                resources.push_back(Resource("Food", 5 * building.level));
+                resources.push_back(Resource("Food", 8 * building.level));
             }
             if (building.type == "Gold Mine") {
-                resources.push_back(Resource("Gold", 2 * building.level));
+                resources.push_back(Resource("Gold", 5 * building.level));
             }
             if (building.type == "Lumber Mill") {
                 // Add 1 wood resource to the village's resources
-                resources.push_back(Resource("Wood", 1 * building.level));
+                resources.push_back(Resource("Wood", 10 * building.level));
             }
         }
     }
+    void buildOrUpgradeBuilding(const std::string& buildingType) {
+        // Check if the village has the resources to build or upgrade the building
+        bool hasResources = true;
+        int goldCost = 0;
+        int woodCost = 0;
+        int foodCost = 0;
+        if (buildingType == "Farm") {
+            goldCost = 30;
+            woodCost = 50;
+            foodCost = 10;
+        } else if (buildingType == "Gold Mine") {
+            goldCost = 50;
+            woodCost = 40;
+            foodCost = 20;
+        } else if (buildingType == "Lumber Mill") {
+            goldCost = 40;
+            woodCost = 60;
+            foodCost = 15;
+        } else {
+            std::cout << "Invalid building type." << std::endl;
+            return;
+        }
 
-};
+        //Check if the village has the resources to build or upgrade the building
+        for (const Resource &resource: resources) {
+            if (resource.type == "Gold" && resource.amount < goldCost) {
+                hasResources = false;
+                break;
+            }
+            if (resource.type == "Wood" && resource.amount < woodCost) {
+                hasResources = false;
+                break;
+            }
+            if (resource.type == "Food" && resource.amount < foodCost) {
+                hasResources = false;
+                break;
+            }
+        }
+        if (!hasResources) {
+            std::cout << "The village does not have enough resources to build or upgrade this building." << std::endl;
+            return;
+        }
+
+        // Remove the building cost resources from the village's resources
+        for (auto it = resources.begin(); it != resources.end(); ++it) {
+            if (it->type == "Gold" && it->amount >= goldCost) {
+                it->amount -= goldCost;
+            }
+            if (it->type == "Wood" && it->amount >= woodCost) {
+                it->amount -= woodCost;
+            }
+            if (it->type == "Food" && it->amount >= foodCost) {
+                it->amount -= foodCost;
+            }
+        }
+
+        // Check if the village already has a building of the given type
+        bool buildingExists = false;
+        int buildingLevel = 0;
+        for (Building &building: buildings) {
+            if (building.type == buildingType) {
+                buildingExists = true;
+                buildingLevel = building.level;
+                break;
+            }
+        }
+
+        // If the building does not exist, add a new building of the given type to the village's buildings
+        if (!buildingExists) {
+            Building newBuilding(buildingType, 1, 0);
+            buildings.push_back(newBuilding);
+        } else {
+            // Upgrade the building if it already exists
+            for (Building &building: buildings) {
+                if (building.type == buildingType) {
+                    building.level += 1;
+                    break;
+                }
+            }
+        }
+        std::cout << buildingType << " has been built or upgraded to level " << buildingLevel + 1;
+
+        }
+    };
 
 
 
@@ -244,19 +326,6 @@ public:
     }
 };
 
-class Game {
-public:
-    std::vector<Player> players;  // Vector of players in the game
-    std::vector<Village> villages;  // Vector of villages in the game
-    int currentRound;  // Current round of the game
-    int currentTurn;  // Current turn within the current round
-    bool winConditionMet;  // Flag for whether the win condition has been met
-
-    // Constructor for the Game class
-    Game() : currentRound(1), currentTurn(0), winConditionMet(false) {}
-
-
-};
 
 
 
