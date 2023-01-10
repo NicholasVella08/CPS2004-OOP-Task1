@@ -59,47 +59,69 @@ public:
     int x;  // The x-coordinate of the village on the map
     int y;  // The y-coordinate of the village on the map
     int health;  // The health of the village
-    Player* owner;  // Pointer to the player who owns the village
+    Player *owner;  // Pointer to the player who owns the village
     std::vector<Resource> resources;  // The resources that the village has available
     std::vector<Building> buildings;  // The buildings in the village
     std::vector<Troop> troops;  // The troops stationed in the village
-    std::vector<std::pair<Player*, std::vector<Troop>>> incomingAttacks_;
+    std::vector<std::pair<Player *, std::vector<Troop>>> incomingAttacks_;
 
 
     // Default constructor for the Village class
     Village() : x(0), y(0), health(0), owner(nullptr) {}
 
     // Constructor for the Village class with arguments
-    Village(int x, int y, int health, Player* owner) :
+    Village(int x, int y, int health, Player *owner) :
             x(x), y(y), health(health), owner(owner) {}
 
-    Troop* trainTroop(const std::string& type) {
-        // Check if the village has the resources to train the troop
-        bool hasResources = false;
-        for (const Resource& resource : resources) {
-            if (resource.type == type) {
-                hasResources = true;
-                break;
+    Troop *trainTroop(const std::string &type) {
+        int cost = 0;
+        int carryingCapacity = 0;
+        int attack = 0;
+        if (type == "Archer") {
+            cost = 10;
+            carryingCapacity = 2;
+            attack = 5;
+        } else if (type == "Knight") {
+            cost = 20;
+            carryingCapacity = 5;
+            attack = 10;
+        } else if (type == "Wizard") {
+            cost = 30;
+            carryingCapacity = 10;
+            attack = 15;
+        } else {
+            return nullptr;  // Invalid troop type
+        }
+
+        // Check if the village has enough resources to train the troop
+        int food = 0;
+        for (const Resource &resource: resources) {
+            if (resource.type == "Food") {
+                food += resource.amount;
             }
         }
-        if (!hasResources) {
-            return nullptr;  // Return nullptr if the village doesn't have the resources
+        if (food < cost) {
+            return nullptr;  // Return nullptr if the village doesn't have enough resources
         }
 
         // Remove the training resources from the village's resources
         for (auto it = resources.begin(); it != resources.end(); ++it) {
-            if (it->type == type) {
-                resources.erase(it);
+            if (it->type == "Food") {
+                if (it->amount > cost) {
+                    it->amount -= cost;
+                } else {
+                    resources.erase(it);
+                }
                 break;
             }
         }
 
         // Create the new troop and add it to the village's troops
-        Troop* newTroop = new Troop(type, 100, 10, 0, 10);
+        Troop *newTroop = new Troop(type, 100, attack, carryingCapacity, 10);
         troops.push_back(*newTroop);
         return newTroop;
     }
-
+    
     // Attack the given village with the given troops
     void attack(Village& village, const std::vector<Troop>& troops) {
         // Calculate the total attack power of the attacking troops
@@ -199,6 +221,7 @@ public:
             }
         }
     }
+
     void buildOrUpgradeBuilding(const std::string& buildingType) {
         // Check if the village has the resources to build or upgrade the building
         bool hasResources = true;
