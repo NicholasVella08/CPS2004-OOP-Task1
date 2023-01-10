@@ -121,33 +121,60 @@ public:
         troops.push_back(*newTroop);
         return newTroop;
     }
-    
+
     // Attack the given village with the given troops
-    void attack(Village& village, const std::vector<Troop>& troops) {
-        // Calculate the total attack power of the attacking troops
+    void attack(Village& targetVillage, std::vector<Troop>& troops) {
         int totalAttackPower = 0;
-        for (const Troop& troop : troops) {
+        for (const Troop &troop: troops) {
             totalAttackPower += troop.attack;
         }
+        int totalDefensePower = 0;
+        for (const Troop &troop: targetVillage.troops) {
+            totalDefensePower += troop.attack;
+        }
 
-        // Reduce the health of the attacked target by the total attack power
-        village.health = std::max(village.health - totalAttackPower, 0);
+        // Kill troops from both sides until total attack power of the opposing army is reached
+        int attackPower = 0;
+        int defensePower = 0;
+        for (auto attacker = troops.begin(); attacker != troops.end();) {
+            if (attackPower >= totalDefensePower) {
+                break;
+            }
+            attackPower += attacker->attack;
+            ++attacker;
+        }
+        for (auto defender = targetVillage.troops.begin(); defender != targetVillage.troops.end();) {
+            if (defensePower >= totalAttackPower) {
+                break;
+            }
+            defensePower += defender->attack;
+            ++defender;
+        }
+        troops.erase(troops.begin(), troops.begin() + (troops.size() - attackPower));
+        targetVillage.troops.erase(targetVillage.troops.begin(),
+                                   targetVillage.troops.begin() + (targetVillage.troops.size() - defensePower));
 
-        // Check if the attack was successful (health of target village is zero or less)
-        if (village.health <= 0) {
-            // Attack was successful:
-            // Transfer the ownership of the village to the attacker
-            village.owner = owner;
-
-            // Capture any resources in the village
-            resources.insert(resources.end(), village.resources.begin(), village.resources.end());
-
-            // Clear the resources of the captured village
-            village.resources.clear();
+        // Check if the attack was successful or not
+        if (!troops.empty()) {
+            // Attack was successful
+            targetVillage.health -= totalAttackPower;
+            int carryingCapacity = 0;
+            for (const auto &troop: troops) {
+                carryingCapacity += troop.carryingCapacity;
+            }
+            for (auto it = targetVillage.resources.begin(); it != targetVillage.resources.end();) {
+                if (carryingCapacity > 0) {
+                    carryingCapacity -= it->amount;
+                    it = targetVillage.resources.erase(it);
+                } else {
+                    break;
+                }
+            }
+            int marchingSpeed = 0;
         }
     }
 
-    // Check if the village is under attack by enemy troops
+            // Check if the village is under attack by enemy troops
     bool isUnderAttack() const {
         // Check if there are any incoming troops that have not yet arrive at the village
         for(const Troop& troop : troops) {
