@@ -237,14 +237,14 @@ public:
         // Earn resources according to the village's resource-generating buildings
         for (const Building& building : buildings) {
             if (building.type == "Farm") {
-                resources.push_back(Resource("Food", 8 * building.level));
+                resources.push_back(Resource("Food", 20 * building.level));
             }
             if (building.type == "Gold Mine") {
-                resources.push_back(Resource("Gold", 5 * building.level));
+                resources.push_back(Resource("Gold", 10 * building.level));
             }
             if (building.type == "Lumber Mill") {
                 // Add 1 wood resource to the village's resources
-                resources.push_back(Resource("Wood", 10 * building.level));
+                resources.push_back(Resource("Wood", 15 * building.level));
             }
         }
     }
@@ -256,17 +256,17 @@ public:
         int woodCost = 0;
         int foodCost = 0;
         if (buildingType == "Farm") {
-            goldCost = 30;
-            woodCost = 50;
-            foodCost = 10;
-        } else if (buildingType == "Gold Mine") {
-            goldCost = 50;
-            woodCost = 40;
-            foodCost = 20;
-        } else if (buildingType == "Lumber Mill") {
-            goldCost = 40;
-            woodCost = 60;
+            goldCost = 10;
+            woodCost = 20;
             foodCost = 15;
+        } else if (buildingType == "Gold Mine") {
+            goldCost = 15;
+            woodCost = 20;
+            foodCost = 10;
+        } else if (buildingType == "Lumber Mill") {
+            goldCost = 15;
+            woodCost = 20;
+            foodCost = 10;
         } else {
             std::cout << "Invalid building type." << std::endl;
             return;
@@ -397,38 +397,85 @@ public:
 
     AI(Village* village) : village(village), gen(rd()), dist(0, MAP_WIDTH*MAP_HEIGHT-1) {}
 
+    Village* selectRandomVillage() {
+        int villageIndex = dist(gen);
+        return map_->cells[villageIndex % MAP_WIDTH][villageIndex / MAP_WIDTH];
+    }
+
     void takeTurn() {
         // Earn resources
         village->earnResources();
 
         // Check if the village is under attack
         village->resolveAttacks();
+        int ready = 0;
+        do {
+            // Decide on an action
+            int action = dist(gen) % 3;
+            if (action == 0) {
+                // Attack a random village
+                Village *targetVillage = selectRandomVillage();
+                if (targetVillage != nullptr && targetVillage->owner != village->owner) {
+                    village->attack(*selectRandomVillage(), village->troops);
+                    ready = 1;
+                }
+            } else if (action == 1) {
+                // Train a random type of troop
+                std::vector<std::string> troopTypes = {"Archer", "Knight", "Wizard"};
+                int troopTypeIndex = dist(gen) % troopTypes.size();
+                std::string troopType = troopTypes[troopTypeIndex];
 
-        // Decide on an action
-        int action = dist(gen) % 3;
-        if (action == 0) {
-            // Attack a random village
-            Village* targetVillage = selectRandomVillage();
-            if (targetVillage != nullptr && targetVillage->owner != village->owner) {
-                village->attack(*selectRandomVillage(), village->troops);
+                int food = 0;
+                for (const Resource &resource: village->resources) {
+                    if (resource.type == "Food") {
+                        food = resource.amount;
+                        break;
+                    }
+                }
+
+                int cost = 0;
+                if (troopType == "Archer") {
+                    cost = 10;
+                } else if (troopType == "Knight") {
+                    cost = 20;
+                } else if (troopType == "Wizard") {
+                    cost = 30;
+                }
+
+                if (food >= cost) {
+                    village->trainTroop(troopType);
+                    ready = 1;
+                }
+            }else if (action == 2) {
+                // Build or upgrade a random type of building
+                std::vector<std::string> buildingTypes = {"Farm", "Gold Mine", "Lumber Mill"};
+                int buildingTypeIndex = dist(gen) % buildingTypes.size();
+                std::string buildingType = buildingTypes[buildingTypeIndex];
+
+                // check if the village has enough resources to build or upgrade the building
+                int gold = 0, wood = 0, food = 0;
+                for (const Resource &resource: village->resources) {
+                    if (resource.type == "Gold") gold += resource.amount;
+                    if (resource.type == "Wood") wood += resource.amount;
+                    if (resource.type == "Food") food += resource.amount;
+                }
+
+                if (buildingType == "Farm" && gold >= 25 && wood >= 20 && food >= 15) {
+                    village->buildOrUpgradeBuilding(buildingType);
+                    ready = 1;
+                } else if (buildingType == "Gold Mine" && gold >= 15 && wood >= 20 && food >= 10) {
+                    village->buildOrUpgradeBuilding(buildingType);
+                    ready = 1;
+                }
+                else if (buildingType == "Lumber Mill" && gold >= 15 && wood >= 20 && food >= 10) {
+                    village->buildOrUpgradeBuilding(buildingType);
+                    ready = 1;
+                }
+
             }
-        } else if (action == 1) {
-            // Train a random type of troop
-            std::vector<std::string> troopTypes = {"Archer", "Knight", "Wizard"};
-            int troopTypeIndex = dist(gen) % troopTypes.size();
-            village->trainTroop(troopTypes[troopTypeIndex]);
-        } else if (action == 2) {
-            // Build or upgrade a random type of building
-            std::vector<std::string> buildingTypes = {"Farm", "Gold Mine", "Lumber Mill"};
-            int buildingTypeIndex = dist(gen) % buildingTypes.size();
-            std::string buildingType = buildingTypes[buildingTypeIndex];
-            village->buildOrUpgradeBuilding(buildingType);
-        }
-    }
 
-    Village* selectRandomVillage() {
-        int villageIndex = dist(gen);
-        return map_->cells[villageIndex % MAP_WIDTH][villageIndex / MAP_WIDTH];
+
+        } while (ready == 1);
     }
 private:
     Map* map_;
@@ -436,17 +483,9 @@ private:
 
 
 
-
-
-
-
-
-
-
-
-int main(){
+int main() {
     Village v;
     // Train a new troop of type "Archer"
-    Troop* archer = v.trainTroop("Archer");
+    Troop *archer = v.trainTroop("Archer");
     return 0;
 };
