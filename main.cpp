@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <vector>
 #include <map>
+#include <random>
 const int MAP_WIDTH = 50; // The width of the map (in grid cells)
 const int MAP_HEIGHT = 50; // The height of the map (in grid cells)
 
@@ -389,20 +390,57 @@ public:
 
 class AI {
 public:
-    AI(Map* map) : map_(map) {}
-    void decideMove();
-    Village* selectRandomVillage(){
-        int numVillages = map_->villageLocations.size();
-        int randomIndex = rand() % numVillages;
-        auto it = map_->villageLocations.begin();
-        std::advance(it, randomIndex);
-        return it->first;
+    Village* village;
+    std::mt19937 gen;
+    std::uniform_int_distribution<> dist;
+    std::random_device rd;
+
+    AI(Village* village) : village(village), gen(rd()), dist(0, MAP_WIDTH*MAP_HEIGHT-1) {}
+
+    void takeTurn() {
+        // Earn resources
+        village->earnResources();
+
+        // Check if the village is under attack
+        village->resolveAttacks();
+
+        // Decide on an action
+        int action = dist(gen) % 3;
+        if (action == 0) {
+            // Attack a random village
+            Village* targetVillage = selectRandomVillage();
+            if (targetVillage != nullptr && targetVillage->owner != village->owner) {
+                village->attack(*selectRandomVillage(), village->troops);
+            }
+        } else if (action == 1) {
+            // Train a random type of troop
+            std::vector<std::string> troopTypes = {"Archer", "Knight", "Wizard"};
+            int troopTypeIndex = dist(gen) % troopTypes.size();
+            village->trainTroop(troopTypes[troopTypeIndex]);
+        } else if (action == 2) {
+            // Build or upgrade a random type of building
+            std::vector<std::string> buildingTypes = {"Farm", "Gold Mine", "Lumber Mill"};
+            int buildingTypeIndex = dist(gen) % buildingTypes.size();
+            std::string buildingType = buildingTypes[buildingTypeIndex];
+            village->buildOrUpgradeBuilding(buildingType);
+        }
     }
-    std::vector<Troop> selectRandomTroops();
-    std::string selectRandomTroopType();
+
+    Village* selectRandomVillage() {
+        int villageIndex = dist(gen);
+        return map_->cells[villageIndex % MAP_WIDTH][villageIndex / MAP_WIDTH];
+    }
 private:
     Map* map_;
 };
+
+
+
+
+
+
+
+
 
 
 
