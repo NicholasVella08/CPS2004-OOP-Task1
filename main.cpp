@@ -174,7 +174,7 @@ public:
         }
     }
 
-            // Check if the village is under attack by enemy troops
+    // Check if the village is under attack by enemy troops
     bool isUnderAttack() const {
         // Check if there are any incoming troops that have not yet arrive at the village
         for(const Troop& troop : troops) {
@@ -184,7 +184,6 @@ public:
         }
         return false;  // No incoming troops, so the village is not under attack
     }
-
 
     void resolveAttacks() {
         // Check if the village is under attack
@@ -332,6 +331,9 @@ public:
         std::cout << buildingType << " has been built or upgraded to level " << buildingLevel + 1;
 
         }
+
+
+
     };
 
 
@@ -374,8 +376,33 @@ public:
     bool isValidLocation(int x, int y) const {
         return x >= 0 && x < MAP_WIDTH && y >= 0 && y < MAP_HEIGHT;
     }
+
+    std::vector<std::pair<int, int>> getVillageLocations() {
+        std::vector<std::pair<int, int>> locations;
+        for (const auto& [village, coord] : villageLocations) {
+            locations.emplace_back(coord);
+        }
+        return locations;
+    }
+
 };
 
+class AI {
+public:
+    AI(Map* map) : map_(map) {}
+    void decideMove();
+    Village* selectRandomVillage(){
+        int numVillages = map_->villageLocations.size();
+        int randomIndex = rand() % numVillages;
+        auto it = map_->villageLocations.begin();
+        std::advance(it, randomIndex);
+        return it->first;
+    }
+    std::vector<Troop> selectRandomTroops();
+    std::string selectRandomTroopType();
+private:
+    Map* map_;
+};
 
 
 
