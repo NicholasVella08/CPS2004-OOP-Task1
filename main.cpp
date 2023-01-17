@@ -126,12 +126,33 @@ public:
     // Attack the given village with the given troops
     void attack(Village& targetVillage, std::vector<Troop>& troops) {
         int totalAttackPower = 0;
+        int archersKilled = 0;
+        int knightsKilled = 0;
+        int wizardsKilled = 0;
         for (const Troop &troop: troops) {
             totalAttackPower += troop.attack;
+            if (troop.type == "Archer") {
+                archersKilled++;
+            } else if (troop.type == "Knight") {
+                knightsKilled++;
+            } else if (troop.type == "Wizard") {
+                wizardsKilled++;
+            }
         }
+
         int totalDefensePower = 0;
+        int defenderArchersKilled = 0;
+        int defenderKnightsKilled = 0;
+        int defenderWizardsKilled = 0;
         for (const Troop &troop: targetVillage.troops) {
             totalDefensePower += troop.attack;
+            if (troop.type == "Archer") {
+                defenderArchersKilled++;
+            } else if (troop.type == "Knight") {
+                defenderKnightsKilled++;
+            } else if (troop.type == "Wizard") {
+                defenderWizardsKilled++;
+            }
         }
 
         // Kill troops from both sides until total attack power of the opposing army is reached
@@ -163,19 +184,31 @@ public:
             for (const auto &troop: troops) {
                 carryingCapacity += troop.carryingCapacity;
             }
+            int goldTaken = 0;
+            int foodTaken = 0;
+            int woodTaken = 0;
             for (auto it = targetVillage.resources.begin(); it != targetVillage.resources.end();) {
                 if (carryingCapacity > 0) {
+                    if(it->type == "gold") goldTaken += it->amount;
+                    if(it->type == "food") foodTaken += it->amount;
+                    if(it->type == "wood") woodTaken += it->amount;
                     carryingCapacity -= it->amount;
                     it = targetVillage.resources.erase(it);
                 } else {
                     break;
                 }
             }
-            int marchingSpeed = 0;
+            std::cout << "The attacker lost " << archersKilled << " archers, " << knightsKilled << " knights and " << wizardsKilled << " wizards." << std::endl;
+            std::cout << "The defender lost " << defenderArchersKilled << " archers, " << defenderKnightsKilled << " knights and " << defenderWizardsKilled << " wizards." << std::endl;
+            std::cout << "The attacker took " << goldTaken << " gold, " << foodTaken << " food and " << woodTaken << " wood." << std::endl;
+        } else {
+            // Attack was unsuccessful
+            std::cout << "The attack was unsuccessful." << std::endl;
         }
     }
 
-    // Check if the village is under attack by enemy troops
+
+                    // Check if the village is under attack by enemy troops
     bool isUnderAttack() const {
         // Check if there are any incoming troops that have not yet arrive at the village
         for(const Troop& troop : troops) {
