@@ -6,7 +6,7 @@
 #include <random>
 const int MAP_WIDTH = 50; // The width of the map (in grid cells)
 const int MAP_HEIGHT = 50; // The height of the map (in grid cells)
-
+std::random_device rd;
 
 class Resource {
 public:
@@ -333,8 +333,6 @@ public:
 
         }
 
-
-
     };
 
 
@@ -481,11 +479,127 @@ private:
     Map* map_;
 };
 
+//int main() {
+//    std::cout << "Enter number of players: ";
+//    int numPlayers;
+//    std::cin >> numPlayers;
+//    std::cout << "Enter number of AIs: ";
+//    int numAIs;
+//    std::cin >> numAIs;
+//
+//    // Create a map and generate villages for players and AIs
+//    Map map_;
+//    std::vector<Player*> players;
+//    std::vector<AI> ais;
+//    int totalNumVillages = numPlayers + numAIs;
+//    std::vector<std::pair<int, int>> villageLocations;
+//    for (int i = 0; i < totalNumVillages; i++) {
+//        int x = i % MAP_WIDTH;
+//        int y = i / MAP_HEIGHT;
+//        Village* village = new Village(x, y, 100, nullptr);
+//        if (i < numPlayers) {
+//            Player* player = new Player("Player " + std::to_string(i+1));
+//            village->owner = player;
+//            players.push_back(player);
+//        }
+//
+//        villageLocations.push_back({x, y});
+//        map_.addVillage(village, x, y);
+//    }
+//
+//    // Main game loop
+//    bool gameIsRunning = true;
+//    while (gameIsRunning) {
+//        // ...
+//    }
+//
+//    return 0;
+//}
+
 
 
 int main() {
-    Village v;
-    // Train a new troop of type "Archer"
-    Troop *archer = v.trainTroop("Archer");
+
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dist(0, MAP_WIDTH*MAP_HEIGHT-1);
+
+    // Create a map object
+    Map map;
+
+    // Prompt the user for the number of players
+    int numPlayers;
+    std::cout << "Enter the number of players: ";
+    std::cin >> numPlayers;
+
+    // Prompt the user for the number of AIs
+    int numAIs;
+    std::cout << "Enter the number of AIs: ";
+    std::cin >> numAIs;
+
+    // Create the player and AI objects
+    std::vector<Player*> players;
+    std::vector<AI*> AIs;
+    for (int i = 1; i <= numPlayers; i++) {
+        std::string playerName;
+        std::cout << "Enter the name of player " << i << ": ";
+        std::cin >> playerName;
+        players.push_back(new Player(playerName));
+    }
+    for (int i = 1; i <= numAIs; i++) {
+        Village *village = new Village(i, i, 100, nullptr);
+        AIs.push_back(new AI(village));
+    }
+
+
+// Place the villages on the map
+    std::vector<std::pair<int, int>> villageLocations;
+    for (int i = 0; i < numPlayers; i++) {
+        int index = dist(gen);
+        int x = index % MAP_WIDTH;
+        int y = index / MAP_WIDTH;
+        while (std::find(villageLocations.begin(), villageLocations.end(), std::make_pair(x, y)) != villageLocations.end()) {
+            index = dist(gen);
+            x = index % MAP_WIDTH;
+            y = index / MAP_WIDTH;
+        }
+        Village* village = new Village(x, y, 100, players[i]);
+        villageLocations.emplace_back(x, y);
+        map.addVillage(village, x, y);
+    }
+    for (int i = 0; i < numAIs; i++) {
+        int index = dist(gen);
+        int x = index % MAP_WIDTH;
+        int y = index / MAP_WIDTH;
+        while (std::find(villageLocations.begin(), villageLocations.end(), std::make_pair(x, y)) != villageLocations.end()) {
+            index = dist(gen);
+            x = index % MAP_WIDTH;
+            y = index / MAP_HEIGHT;
+        }
+        AIs[i]->village->x = x;
+        AIs[i]->village->y = y;
+        map.addVillage(AIs[i]->village, x, y);
+        villageLocations.emplace_back(x, y);
+    }
+
+
+
+    // Game loop
+    bool gameIsRunning = true;
+    while (gameIsRunning) {
+        // Code to update game state, handle player input, etc.
+        // ...
+    }
+
+    // Clean up memory
+    for (auto player : players) {
+        delete player;
+    }
+    for (auto AI : AIs) {
+        delete AI;
+    }
+    for (auto &[village, coord] : map.villageLocations) {
+        delete village;
+    }
     return 0;
-};
+}
+
