@@ -45,23 +45,37 @@ public:
 
 };
 
-class MarchingTroops : public Troop {
+//class MarchingTroops : public Troop {
+//public:
+//    // Additional properties for marching troops
+//    int distance;  // The distance to the target village
+//    int timeRemaining;  // The time remaining until the troops reach the target village
+//
+//    // Constructor for the MarchingTroops class
+//    MarchingTroops(const std::string& type, int health, int attack,
+//                   int carryingCapacity, int marchingSpeed, int distance, int timeRemaining) :
+//            Troop(type, health, attack, carryingCapacity, marchingSpeed),
+//            distance(distance), timeRemaining(timeRemaining) {}
+//
+//    // Method for updating the time remaining for the troops to reach the target village
+//    void updateTimeRemaining() {
+//        timeRemaining--;
+//    }
+//};
+
+class MarchingTroops : public Troop, public Resource {
 public:
-    // Additional properties for marching troops
-    int distance;  // The distance to the target village
-    int timeRemaining;  // The time remaining until the troops reach the target village
+    int marchTime; // The time it takes for the troops to reach their destination
+    int destinationX; // The x-coordinate of the destination
+    int destinationY; // The y-coordinate of the destination
+    bool isMarching; // Whether or not the troops are currently marching
 
     // Constructor for the MarchingTroops class
-    MarchingTroops(const std::string& type, int health, int attack,
-                   int carryingCapacity, int marchingSpeed, int distance, int timeRemaining) :
-            Troop(type, health, attack, carryingCapacity, marchingSpeed),
-            distance(distance), timeRemaining(timeRemaining) {}
-
-    // Method for updating the time remaining for the troops to reach the target village
-    void updateTimeRemaining() {
-        timeRemaining--;
-    }
+    MarchingTroops(const std::string& type, int health, int attack, int carryingCapacity, int marchingSpeed, int gold, int food, int wood, int marchTime, int destinationX, int destinationY)
+            : Troop(type, health, attack, carryingCapacity, marchingSpeed), Resource(type, amount), marchTime(marchTime), destinationX(destinationX), destinationY(destinationY), isMarching(true) {}
 };
+
+
 // Full definition of the Player class
 class Player {
 public:
