@@ -45,6 +45,23 @@ public:
 
 };
 
+class MarchingTroops : public Troop {
+public:
+    // Additional properties for marching troops
+    int distance;  // The distance to the target village
+    int timeRemaining;  // The time remaining until the troops reach the target village
+
+    // Constructor for the MarchingTroops class
+    MarchingTroops(const std::string& type, int health, int attack,
+                   int carryingCapacity, int marchingSpeed, int distance, int timeRemaining) :
+            Troop(type, health, attack, carryingCapacity, marchingSpeed),
+            distance(distance), timeRemaining(timeRemaining) {}
+
+    // Method for updating the time remaining for the troops to reach the target village
+    void updateTimeRemaining() {
+        timeRemaining--;
+    }
+};
 // Full definition of the Player class
 class Player {
 public:
@@ -172,11 +189,8 @@ public:
             defensePower += defender->attack;
             ++defender;
         }
-        troops.erase(troops.begin(), troops.begin() + (troops.size() - attackPower));
-        targetVillage.troops.erase(targetVillage.troops.begin(),
-                                   targetVillage.troops.begin() + (targetVillage.troops.size() - defensePower));
 
-        // Check if the attack was successful or not
+        //Check if the attack was successful or not
         if (!troops.empty()) {
             // Attack was successful
             targetVillage.health -= totalAttackPower;
@@ -189,26 +203,62 @@ public:
             int woodTaken = 0;
             for (auto it = targetVillage.resources.begin(); it != targetVillage.resources.end();) {
                 if (carryingCapacity > 0) {
-                    if(it->type == "gold") goldTaken += it->amount;
-                    if(it->type == "food") foodTaken += it->amount;
-                    if(it->type == "wood") woodTaken += it->amount;
+                    if (it->type == "gold") goldTaken += it->amount;
+                    if (it->type == "food") foodTaken += it->amount;
+                    if (it->type == "wood") woodTaken += it->amount;
                     carryingCapacity -= it->amount;
                     it = targetVillage.resources.erase(it);
                 } else {
                     break;
                 }
             }
-            std::cout << "The attacker lost " << archersKilled << " archers, " << knightsKilled << " knights and " << wizardsKilled << " wizards." << std::endl;
-            std::cout << "The defender lost " << defenderArchersKilled << " archers, " << defenderKnightsKilled << " knights and " << defenderWizardsKilled << " wizards." << std::endl;
-            std::cout << "The attacker took " << goldTaken << " gold, " << foodTaken << " food and " << woodTaken << " wood." << std::endl;
-        } else {
-            // Attack was unsuccessful
-            std::cout << "The attack was unsuccessful." << std::endl;
+            std::cout << "The attacker lost " << archersKilled << " archers, " << knightsKilled << " knights and "
+                      << wizardsKilled << " wizards." << std::endl;
+            std::cout << "The defender lost " << defenderArchersKilled << " archers, " << defenderKnightsKilled
+                      << " knights and " << defenderWizardsKilled << " wizards." << std::endl;
+            std::cout << "The attacker took " << goldTaken << " gold, " << foodTaken << " food and " << woodTaken
+                      << " wood." << std::endl;
+        }
+    }
+
+    void updateResourcesAndTroops(int gold, int food, int wood, int archersKilled, int knightsKilled, int wizardsKilled) {
+        // Add the taken resources to the attacker's resources
+        resources.push_back(Resource("Food", food));
+        resources.push_back(Resource("gold", gold));
+        resources.push_back(Resource("wood", wood));
+        // Subtract the killed troops from the attacker's troops
+        auto it = troops.begin();
+        while (archersKilled > 0 && it != troops.end()) {
+            if (it->type == "Archer") {
+                it = troops.erase(it);
+                archersKilled--;
+            } else {
+                it++;
+            }
+        }
+        it = troops.begin();
+        while (knightsKilled > 0 && it != troops.end()) {
+            if (it->type == "Knight") {
+                it = troops.erase(it);
+                knightsKilled--;
+            } else {
+                it++;
+            }
+        }
+        it = troops.begin();
+        while (wizardsKilled > 0 && it != troops.end()) {
+            if (it->type == "Wizard") {
+                it = troops.erase(it);
+                wizardsKilled--;
+            } else {
+                it++;
+            }
         }
     }
 
 
-                    // Check if the village is under attack by enemy troops
+
+            // Check if the village is under attack by enemy troops
     bool isUnderAttack() const {
         // Check if there are any incoming troops that have not yet arrive at the village
         for(const Troop& troop : troops) {
