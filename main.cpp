@@ -36,12 +36,13 @@ public:
     int attack;  // The attack power of the troop
     int carryingCapacity;  // The carrying capacity of the troop (for resources)
     int marchingSpeed;  // The marching speed of the troop
+    int amount;
 
     // Constructor for the Troop class
-    Troop(const std::string& type, int health, int attack,
+    Troop(const std::string& type, int health, int attack,int amount,
           int carryingCapacity, int marchingSpeed) :
             type(type), health(health), attack(attack),
-            carryingCapacity(carryingCapacity), marchingSpeed(marchingSpeed) {}
+            carryingCapacity(carryingCapacity), marchingSpeed(marchingSpeed), amount(amount){}
 
 };
 
@@ -69,10 +70,13 @@ public:
     int destinationX; // The x-coordinate of the destination
     int destinationY; // The y-coordinate of the destination
     bool isMarching; // Whether or not the troops are currently marching
+    std::vector<Resource> resources;
+    std::vector<Troop> troops;
+
 
     // Constructor for the MarchingTroops class
-    MarchingTroops(const std::string& type, int health, int attack, int carryingCapacity, int marchingSpeed, int gold, int food, int wood, int marchTime, int destinationX, int destinationY)
-            : Troop(type, health, attack, carryingCapacity, marchingSpeed), Resource(type, amount), marchTime(marchTime), destinationX(destinationX), destinationY(destinationY), isMarching(true) {}
+    MarchingTroops(const std::string& type, int health, int attack, int carryingCapacity, int marchingSpeed, int marchTime, int destinationX, int destinationY, int amount)
+            : Troop(type, health, attack, carryingCapacity, marchingSpeed, amount), Resource(type, amount), marchTime(marchTime), destinationX(destinationX), destinationY(destinationY), isMarching(true){}
 };
 
 
@@ -95,6 +99,7 @@ public:
     std::vector<Resource> resources;  // The resources that the village has available
     std::vector<Building> buildings;  // The buildings in the village
     std::vector<Troop> troops;  // The troops stationed in the village
+    std::vector<MarchingTroops> marching;
     std::vector<std::pair<Player *, std::vector<Troop>>> incomingAttacks_;
 
 
@@ -136,7 +141,26 @@ public:
             return nullptr;  // Return nullptr if the village doesn't have enough resources
         }
 
-        // Remove the training resources from the village's resources
+        // check if the troop type already exist
+        for (auto &troop: troops) {
+            if (troop.type == type) {
+                // remove the training resources
+                for (auto it = resources.begin(); it != resources.end();) {
+                    if (it->type == "Food") {
+                        if (it->amount > cost) {
+                            it->amount -= cost;
+                        } else {
+                            resources.erase(it);
+                        }
+                        break;
+                    }
+                }
+                // add the amount of the troops
+                troop.amount++;
+                return &troop;
+            }
+        }
+        // If the troop type doesn't exist, remove the training resources from the village's resources and create a new troop
         for (auto it = resources.begin(); it != resources.end(); ++it) {
             if (it->type == "Food") {
                 if (it->amount > cost) {
@@ -147,14 +171,13 @@ public:
                 break;
             }
         }
-
-        // Create the new troop and add it to the village's troops
-        Troop *newTroop = new Troop(type, 100, attack, carryingCapacity, 10);
+        Troop *newTroop = new Troop(type, 100, attack, carryingCapacity, 10, 1);
         troops.push_back(*newTroop);
         return newTroop;
     }
 
-    // Attack the given village with the given troops
+
+        // Attack the given village with the given troops
     void attack(Village& targetVillage, std::vector<Troop>& troops) {
         int totalAttackPower = 0;
         int archersKilled = 0;
@@ -236,43 +259,35 @@ public:
     }
 
     void updateResourcesAndTroops(int gold, int food, int wood, int archersKilled, int knightsKilled, int wizardsKilled) {
-        // Add the taken resources to the attacker's resources
-        resources.push_back(Resource("Food", food));
-        resources.push_back(Resource("gold", gold));
-        resources.push_back(Resource("wood", wood));
-        // Subtract the killed troops from the attacker's troops
-        auto it = troops.begin();
-        while (archersKilled > 0 && it != troops.end()) {
-            if (it->type == "Archer") {
-                it = troops.erase(it);
-                archersKilled--;
-            } else {
-                it++;
+        for (auto &marchingTroops : marching) {
+            for (auto &resource : marchingTroops.resources) {
+                if (resource.type == "Gold") {
+                    resource.amount += gold;
+                } else if (resource.type == "Food") {
+                    resource.amount += food;
+                } else if (resource.type == "Wood") {
+                    resource.amount += wood;
+                }
             }
-        }
-        it = troops.begin();
-        while (knightsKilled > 0 && it != troops.end()) {
-            if (it->type == "Knight") {
-                it = troops.erase(it);
-                knightsKilled--;
-            } else {
-                it++;
-            }
-        }
-        it = troops.begin();
-        while (wizardsKilled > 0 && it != troops.end()) {
-            if (it->type == "Wizard") {
-                it = troops.erase(it);
-                wizardsKilled--;
-            } else {
-                it++;
+            for (auto &troop : marchingTroops.troops) {
+                if (troop.type == "Archer") {
+                    troop.amount += archersKilled;
+                } else if (troop.type == "Knight") {
+                    troop.amount += knightsKilled;
+                } else if (troop.type == "Wizard") {
+                    troop.amount += wizardsKilled;
+                }
             }
         }
     }
 
 
 
-            // Check if the village is under attack by enemy troops
+
+
+
+
+    // Check if the village is under attack by enemy troops
     bool isUnderAttack() const {
         // Check if there are any incoming troops that have not yet arrive at the village
         for(const Troop& troop : troops) {
