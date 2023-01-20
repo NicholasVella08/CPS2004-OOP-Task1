@@ -649,12 +649,15 @@ int main() {
 
     bool turn=false;
     int playerChoice;
+    int buildingChoice;
+
     // Game loop
     bool gameIsRunning = true;
     while (gameIsRunning) {
         for (auto &player : players) {
-            player->village.earnResource();
+            player->Village.earnResource();
             //want to output all resources and troops;
+            std::cout << "Village of "<< player;
             std::cout << "Total Food: ";
             std::cout << "Total Gold: ";
             std::cout << "Total Wood: ";
@@ -676,22 +679,40 @@ int main() {
                 std::cout << "Enter your choice: ";
                 std::cin >> playerChoice;
                 switch(playerChoice){
-                    case 1:
+                    case 1: std::cout << "1. Farm";
+                            std::cout << "2. Gold Mine ";
+                            std::cout << "3. Lumber MIll ";
+
+                            std::cout << "Which building you want to build or upgrade: ";
+                            std::cin >> buildingChoice;
+
+                            switch(buildingChoice){
+                                case 1: turn = player->village.buildOrUpgradeBuilding("Farm");
+                                        break;
+                                case 2: turn = player->village.buildOrUpgradeBuilding("Gold Mine");
+                                        break;
+                                case 3: turn = player->village.buildOrUpgradeBuilding("Lumber Mill");
+                                        break;
+                                default: std::cout<< "Invalid Choice";
+                            }
                             break;
                     case 2:
                             break;
                     case 3:
                             break;
-                    case 4:
-                            break;
-                    case 5:
+                    case 4: map.removeVillage(player->village);
+                            std::cout<< "Village of "<< player<<"has been distroyed";
+                            turn=true;
                             break;
 
-                    Default: std::cout<< "Invalid Choice";
+                    case 5: turn = true;
+                            break;
+
+                    default: std::cout<< "Invalid Choice";
 
                 }
             }while(turn == false);
-
+            turn = false;
         }
         for (auto aiPlayer : AIs) {
             aiPlayer->takeTurn();
