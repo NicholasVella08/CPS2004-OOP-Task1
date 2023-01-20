@@ -6,6 +6,7 @@
 #include <random>
 const int MAP_WIDTH = 50; // The width of the map (in grid cells)
 const int MAP_HEIGHT = 50; // The height of the map (in grid cells)
+#include "Village.h";
 std::random_device rd;
 
 class Resource {
@@ -46,23 +47,6 @@ public:
 
 };
 
-//class MarchingTroops : public Troop {
-//public:
-//    // Additional properties for marching troops
-//    int distance;  // The distance to the target village
-//    int timeRemaining;  // The time remaining until the troops reach the target village
-//
-//    // Constructor for the MarchingTroops class
-//    MarchingTroops(const std::string& type, int health, int attack,
-//                   int carryingCapacity, int marchingSpeed, int distance, int timeRemaining) :
-//            Troop(type, health, attack, carryingCapacity, marchingSpeed),
-//            distance(distance), timeRemaining(timeRemaining) {}
-//
-//    // Method for updating the time remaining for the troops to reach the target village
-//    void updateTimeRemaining() {
-//        timeRemaining--;
-//    }
-//};
 
 class MarchingTroops : public Troop, public Resource {
 public:
@@ -79,16 +63,25 @@ public:
             : Troop(type, health, attack, carryingCapacity, marchingSpeed, amount), Resource(type, amount), marchTime(marchTime), destinationX(destinationX), destinationY(destinationY), isMarching(true){}
 };
 
-
 // Full definition of the Player class
 class Player {
+    Village* village;
 public:
     std::string name;  // The name of the player
     std::vector<Troop> troops;
     std::vector<Resource> resources;
+
+
+
     // Constructor for the Player class
     Player(const std::string& name) : name(name) {}
+
+    Player(Village* village) : village(village) {};
+    void earnResource() {
+        village.earnResource();
+    }
 };
+
 
 class Village {
 public:
@@ -281,12 +274,6 @@ public:
         }
     }
 
-
-
-
-
-
-
     // Check if the village is under attack by enemy troops
     bool isUnderAttack() const {
         // Check if there are any incoming troops that have not yet arrive at the village
@@ -361,7 +348,7 @@ public:
         }
     }
 
-    void buildOrUpgradeBuilding(const std::string& buildingType) {
+    bool buildOrUpgradeBuilding(const std::string& buildingType) {
         // Check if the village has the resources to build or upgrade the building
         bool hasResources = true;
         int goldCost = 0;
@@ -381,7 +368,7 @@ public:
             foodCost = 10;
         } else {
             std::cout << "Invalid building type." << std::endl;
-            return;
+            return false;
         }
 
         //Check if the village has the resources to build or upgrade the building
@@ -401,7 +388,7 @@ public:
         }
         if (!hasResources) {
             std::cout << "The village does not have enough resources to build or upgrade this building." << std::endl;
-            return;
+            return false;
         }
 
         // Remove the building cost resources from the village's resources
@@ -442,10 +429,12 @@ public:
             }
         }
         std::cout << buildingType << " has been built or upgraded to level " << buildingLevel + 1;
-
+        return true;
         }
 
     };
+
+
 
 
 
@@ -591,42 +580,7 @@ private:
     Map* map_;
 };
 
-//int main() {
-//    std::cout << "Enter number of players: ";
-//    int numPlayers;
-//    std::cin >> numPlayers;
-//    std::cout << "Enter number of AIs: ";
-//    int numAIs;
-//    std::cin >> numAIs;
-//
-//    // Create a map and generate villages for players and AIs
-//    Map map_;
-//    std::vector<Player*> players;
-//    std::vector<AI> ais;
-//    int totalNumVillages = numPlayers + numAIs;
-//    std::vector<std::pair<int, int>> villageLocations;
-//    for (int i = 0; i < totalNumVillages; i++) {
-//        int x = i % MAP_WIDTH;
-//        int y = i / MAP_HEIGHT;
-//        Village* village = new Village(x, y, 100, nullptr);
-//        if (i < numPlayers) {
-//            Player* player = new Player("Player " + std::to_string(i+1));
-//            village->owner = player;
-//            players.push_back(player);
-//        }
-//
-//        villageLocations.push_back({x, y});
-//        map_.addVillage(village, x, y);
-//    }
-//
-//    // Main game loop
-//    bool gameIsRunning = true;
-//    while (gameIsRunning) {
-//        // ...
-//    }
-//
-//    return 0;
-//}
+
 
 
 
@@ -693,13 +647,56 @@ int main() {
         villageLocations.emplace_back(x, y);
     }
 
-
-
+    bool turn=false;
+    int playerChoice;
     // Game loop
     bool gameIsRunning = true;
     while (gameIsRunning) {
-        // Code to update game state, handle player input, etc.
-        // ...
+        for (auto &player : players) {
+            player->village.earnResource();
+            //want to output all resources and troops;
+            std::cout << "Total Food: ";
+            std::cout << "Total Gold: ";
+            std::cout << "Total Wood: ";
+            std::cout << "----------------------";
+            std::cout << "Total Archers: ";
+            std::cout << "Total Knights: ";
+            std::cout << "Total Wizards: ";
+            std::cout << "----------------------";
+            std::cout << "Level of Farm: ";
+            std::cout << "Level of Gold Mine: ";
+            std::cout << "Level of Lumber MIll: ";
+            std::cout << "######################\n\n";
+            std::cout << "1. Build or Upgrade Buildings";
+            std::cout << "2. Train Troops";
+            std::cout << "3. Attack Village";
+            std::cout << "4. Surrender Village";
+            std::cout << "5. Pass Turn\n";
+            do{
+                std::cout << "Enter your choice: ";
+                std::cin >> playerChoice;
+                switch(playerChoice){
+                    case 1:
+                            break;
+                    case 2:
+                            break;
+                    case 3:
+                            break;
+                    case 4:
+                            break;
+                    case 5:
+                            break;
+
+                    Default: std::cout<< "Invalid Choice";
+
+                }
+            }while(turn == false);
+
+        }
+        for (auto aiPlayer : AIs) {
+            aiPlayer->takeTurn();
+        }
+
     }
 
     // Clean up memory
