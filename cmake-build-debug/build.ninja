@@ -55,6 +55,12 @@ build CMakeFiles/CPS2004_OOP_Task1.dir/main.cpp.obj: CXX_COMPILER__CPS2004_OOP_T
   OBJECT_DIR = CMakeFiles\CPS2004_OOP_Task1.dir
   OBJECT_FILE_DIR = CMakeFiles\CPS2004_OOP_Task1.dir
 
+build CMakeFiles/CPS2004_OOP_Task1.dir/Village.cpp.obj: CXX_COMPILER__CPS2004_OOP_Task1_Debug C$:/Users/Nicholas$ Vella/OneDrive/Documents/GitHub/CPS2004-OOP-Task1/Village.cpp || cmake_object_order_depends_target_CPS2004_OOP_Task1
+  DEP_FILE = CMakeFiles\CPS2004_OOP_Task1.dir\Village.cpp.obj.d
+  FLAGS = -g
+  OBJECT_DIR = CMakeFiles\CPS2004_OOP_Task1.dir
+  OBJECT_FILE_DIR = CMakeFiles\CPS2004_OOP_Task1.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target CPS2004_OOP_Task1
@@ -63,7 +69,7 @@ build CMakeFiles/CPS2004_OOP_Task1.dir/main.cpp.obj: CXX_COMPILER__CPS2004_OOP_T
 #############################################
 # Link the executable CPS2004_OOP_Task1.exe
 
-build CPS2004_OOP_Task1.exe: CXX_EXECUTABLE_LINKER__CPS2004_OOP_Task1_Debug CMakeFiles/CPS2004_OOP_Task1.dir/main.cpp.obj
+build CPS2004_OOP_Task1.exe: CXX_EXECUTABLE_LINKER__CPS2004_OOP_Task1_Debug CMakeFiles/CPS2004_OOP_Task1.dir/main.cpp.obj CMakeFiles/CPS2004_OOP_Task1.dir/Village.cpp.obj
   FLAGS = -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\CPS2004_OOP_Task1.dir
