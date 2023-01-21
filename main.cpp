@@ -31,6 +31,7 @@ int main() {
     // Create the player and AI objects
     std::vector<Player*> players;
     std::vector<AI*> AIs;
+    std::vector<Village> villages;
     for (int i = 1; i <= numPlayers; i++) {
         std::string playerName;
         std::cout << "Enter the name of player " << i << ": ";
@@ -74,19 +75,26 @@ int main() {
     }
 
     bool turn=false;
+    bool correct =false;
     int playerChoice;
     int buildingChoice;
+    int troopChoice;
+
     int foodAmount;
     int goldAmount;
     int woodAmount;
+
     int archerAmount;
     int knightAmount;
     int wizardAmount;
+
     int farmLevel;
     int goldMineLevel;
     int lumberMillLevel;
 
-
+    int numArchers;
+    int numKnights;
+    int numWizards;
 
     // Game loop
     bool gameIsRunning = true;
@@ -207,10 +215,106 @@ int main() {
                                 default: std::cout<< "Invalid Choice";
                             }
                             break;
-                    case 2:
+                    case 2: std::cout << "1. Archer";
+                            std::cout << "2. Knight ";
+                            std::cout << "3. Wizard ";
+                            std::cout << "What troop do you like to train: ";
+                            std::cin >> troopChoice;
+
+                            switch(troopChoice){
+                                case 1: turn = player->village->trainTroop("Archer");
+                                    break;
+                                case 2: turn = player->village->trainTroop("Knight");
+                                    break;
+                                case 3: turn = player->village->trainTroop("Wizard");
+                                    break;
+                                default: std::cout<< "Invalid Choice";
+                            }
                             break;
-                    case 3:
+
+                    case 3: for (const auto &village : villages) {
+                                std::cout << "Village at x: " << village.x << ", y: " << village.y << std::endl;
+                            }
+
+                            std::cout << "Select a village to attack by entering its x-coordinate: ";
+                            int x;
+                            std::cin >> x;
+                            std::cout << "Select a village to attack by entering its y-coordinate: ";
+                            int y;
+                            std::cin >> y;
+
+                            // Search for the village the player selected
+                            Village *targetVillage = nullptr;
+                            for (auto &village : villages) {
+                                if (village.x == x && village.y == y) {
+                                    targetVillage = &village;
+                                    break;
+                                }
+                            }
+
+                            // Make sure a valid village was selected
+                            if (targetVillage == nullptr) {
+                                std::cout << "Invalid village selected." << std::endl;
+
+                            }
+
+                            do{
+                                std::cout << "Enter the number of archers you want to use for the attack: ";
+
+                                std::cin >> numArchers;
+                                if(numArchers > archerAmount){
+                                    std::cout << "You don't have that amount of archers: ";
+                                    numArchers = 0;
+                                    correct =false;
+                                }else{
+                                    correct = true;
+                                }
+                            }while(correct == false);
+
+
+                            do{
+                                std::cout << "Enter the number of knights you want to use for the attack: ";
+
+                                std::cin >> numKnights;
+                                if(numKnights > knightAmount){
+                                    std::cout << "You don't have that amount of knights: ";
+                                    numKnights = 0;
+                                    correct =false;
+                                }else{
+                                    correct = true;
+                                }
+                            }while(correct == false);
+
+                            do{
+                                std::cout << "Enter the number of wizards you want to use for the attack: ";
+
+                                std::cin >> numWizards;
+                                if(numWizards > wizardAmount){
+                                    std::cout << "You don't have that amount of wizards: ";
+                                    numWizards = 0;
+                                    correct =false;
+                                }else{
+                                    correct = true;
+                                }
+                            }while(correct == false);
+
+                            std::vector<Troop> troops;
+                            for (int i = 0; i < numArchers; i++) {
+                                troops.push_back(Troop("Archer", 100, 5, 2, 2, numArchers));
+                            }
+                            for (int i = 0; i < numWizards; i++) {
+                                troops.push_back(Troop("Wizard", 100, 15, 10, 4, numWizards));
+                            }
+                            for (int i = 0; i < numKnights; i++) {
+                                troops.push_back(Troop("Knight", 100, 10, 5, 6, numKnights));
+                            }
+
+
+                            // Now you can call the attack method
+                            player->village.attack(*targetVillage, troops);
+                            turn=true;
                             break;
+
                     case 4: map.removeVillage(player->village);
                             std::cout<< "Village of "<< player<<"has been distroyed";
                             turn=true;

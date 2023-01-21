@@ -45,8 +45,8 @@ public:
     int amount;
 
     // Constructor for the Troop class
-    Troop(const std::string& type, int health, int attack,int amount,
-          int carryingCapacity, int marchingSpeed) :
+    Troop(const std::string& type, int health, int attack,
+          int carryingCapacity, int marchingSpeed,int amount) :
             type(type), health(health), attack(attack),
             carryingCapacity(carryingCapacity), marchingSpeed(marchingSpeed), amount(amount){}
 
@@ -105,24 +105,29 @@ public:
     Village(int x, int y, int health, Player *owner) :
             x(x), y(y), health(health), owner(owner) {}
 
-    Troop *trainTroop(const std::string &type) {
+    bool trainTroop(const std::string &type) {
         int cost = 0;
         int carryingCapacity = 0;
         int attack = 0;
+        int marchingSpeed=0;
+
         if (type == "Archer") {
             cost = 10;
             carryingCapacity = 2;
             attack = 5;
+            marchingSpeed=2;
         } else if (type == "Knight") {
             cost = 20;
             carryingCapacity = 5;
             attack = 10;
+            marchingSpeed=6;
         } else if (type == "Wizard") {
             cost = 30;
             carryingCapacity = 10;
             attack = 15;
+            marchingSpeed=4;
         } else {
-            return nullptr;  // Invalid troop type
+            return false;  // Invalid troop type
         }
 
         // Check if the village has enough resources to train the troop
@@ -133,7 +138,7 @@ public:
             }
         }
         if (food < cost) {
-            return nullptr;  // Return nullptr if the village doesn't have enough resources
+            return false;  // Return nullptr if the village doesn't have enough resources
         }
 
         // check if the troop type already exist
@@ -151,8 +156,9 @@ public:
                     }
                 }
                 // add the amount of the troops
+                std::cout << "A "<<type<<" was added successfully to your troop.";
                 troop.amount++;
-                return &troop;
+                return true;
             }
         }
         // If the troop type doesn't exist, remove the training resources from the village's resources and create a new troop
@@ -166,9 +172,9 @@ public:
                 break;
             }
         }
-        Troop *newTroop = new Troop(type, 100, attack, carryingCapacity, 10, 1);
+        Troop *newTroop = new Troop(type, 100, attack, carryingCapacity, marchingSpeed, 1);
         troops.push_back(*newTroop);
-        return newTroop;
+        return true;
     }
 
 
@@ -221,18 +227,18 @@ public:
             defensePower += defender->attack;
             ++defender;
         }
-
+        int goldTaken = 0;
+        int foodTaken = 0;
+        int woodTaken = 0;
         //Check if the attack was successful or not
         if (!troops.empty()) {
             // Attack was successful
             targetVillage.health -= totalAttackPower;
             int carryingCapacity = 0;
             for (const auto &troop: troops) {
-                carryingCapacity += troop.carryingCapacity;
+                carryingCapacity += troop.amount * troop.carryingCapacity;
             }
-            int goldTaken = 0;
-            int foodTaken = 0;
-            int woodTaken = 0;
+
             for (auto it = targetVillage.resources.begin(); it != targetVillage.resources.end();) {
                 if (carryingCapacity > 0) {
                     if (it->type == "gold") goldTaken += it->amount;
@@ -251,6 +257,8 @@ public:
             std::cout << "The attacker took " << goldTaken << " gold, " << foodTaken << " food and " << woodTaken
                       << " wood." << std::endl;
         }
+
+        updateResourcesAndTroops(goldTaken, foodTaken, woodTaken, archersKilled, knightsKilled, wizardsKilled);
     }
 
     void updateResourcesAndTroops(int gold, int food, int wood, int archersKilled, int knightsKilled, int wizardsKilled) {
