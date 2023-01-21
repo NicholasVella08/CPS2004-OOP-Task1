@@ -10,13 +10,6 @@ std::random_device rd;
 
 
 
-
-
-
-
-
-
-
 int main() {
 
     std::mt19937 gen(rd());
@@ -83,6 +76,17 @@ int main() {
     bool turn=false;
     int playerChoice;
     int buildingChoice;
+    int foodAmount;
+    int goldAmount;
+    int woodAmount;
+    int archerAmount;
+    int knightAmount;
+    int wizardAmount;
+    int farmLevel;
+    int goldMineLevel;
+    int lumberMillLevel;
+
+
 
     // Game loop
     bool gameIsRunning = true;
@@ -91,17 +95,91 @@ int main() {
             player->village->earnResources();
             //want to output all resources and troops;
             std::cout << "Village of "<< player;
-            std::cout << "Total Food: ";
-            std::cout << "Total Gold: ";
-            std::cout << "Total Wood: ";
+            foodAmount = 0;
+            goldAmount = 0;
+            woodAmount = 0;
+            archerAmount = 0;
+            knightAmount = 0;
+            wizardAmount = 0;
+            farmLevel = 0;
+            goldMineLevel = 0;
+            lumberMillLevel = 0;
+
+
+            for (const Resource &resource : player->resources) {
+                if (resource.type == "Food") {
+                    foodAmount = resource.amount;
+                    break;
+                }
+            }
+
+            for (const Resource &resource : player->resources) {
+                if (resource.type == "Gold") {
+                    goldAmount = resource.amount;
+                    break;
+                }
+            }
+
+            for (const Resource &resource : player->resources) {
+                if (resource.type == "Wood") {
+                    woodAmount = resource.amount;
+                    break;
+                }
+            }
+
+            for (const Troop& troop : player->village->troops) {
+                if (troop.type == "Archers") {
+                    archerAmount += troop.amount;
+                }
+            }
+
+            for (const Troop& troop : player->village->troops) {
+                if (troop.type == "Knights") {
+                    knightAmount += troop.amount;
+                }
+            }
+
+            for (const Troop& troop : player->village->troops) {
+                if (troop.type == "Wizards") {
+                    wizardAmount += troop.amount;
+                }
+            }
+
+
+            for (const Building& building : player->village->buildings) {
+                if (building.type == "Farm") {
+                    farmLevel = building.level;
+                    break;
+                }
+            }
+
+
+            for (const Building& building : player->village->buildings) {
+                if (building.type == "Gold Mine") {
+                    goldMineLevel = building.level;
+                    break;
+                }
+            }
+
+
+            for (const Building& building : player->village->buildings) {
+                if (building.type == "Lumber Mill") {
+                    lumberMillLevel = building.level;
+                    break;
+                }
+            }
+
+            std::cout << "Total Food: "<<foodAmount;
+            std::cout << "Total Gold: "<<goldAmount;
+            std::cout << "Total Wood: "<<woodAmount;
             std::cout << "----------------------";
-            std::cout << "Total Archers: ";
-            std::cout << "Total Knights: ";
-            std::cout << "Total Wizards: ";
+            std::cout << "Total Archers: "<<archerAmount;
+            std::cout << "Total Knights: "<<knightAmount;
+            std::cout << "Total Wizards: "<<wizardAmount;
             std::cout << "----------------------";
-            std::cout << "Level of Farm: ";
-            std::cout << "Level of Gold Mine: ";
-            std::cout << "Level of Lumber MIll: ";
+            std::cout << "Level of Farm: "<<farmLevel;
+            std::cout << "Level of Gold Mine: "<<goldMineLevel;
+            std::cout << "Level of Lumber MIll: "<<lumberMillLevel;
             std::cout << "######################\n\n";
             std::cout << "1. Build or Upgrade Buildings";
             std::cout << "2. Train Troops";
