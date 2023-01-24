@@ -3,9 +3,7 @@
 #include <algorithm>
 #include <vector>
 #include <random>
-const int MAP_WIDTH = 50; // The width of the map (in grid cells)
-const int MAP_HEIGHT = 50; // The height of the map (in grid cells)
-#include "Village.h";
+#include "Village.h"
 std::random_device rd;
 
 
@@ -20,8 +18,12 @@ int main() {
 
     // Prompt the user for the number of players
     int numPlayers;
-    std::cout << "Enter the number of players: ";
-    std::cin >> numPlayers;
+    do {
+        std::cout << "Enter the number of players (at least one): ";
+        std::cin >> numPlayers;
+    }while(numPlayers<1);
+
+
 
     // Prompt the user for the number of AIs
     int numAIs;
@@ -38,7 +40,7 @@ int main() {
         std::cin >> playerName;
         players.push_back(new Player(playerName));
     }
-    for (int i = 1; i <= numAIs; i++) {
+    for (int i = 0; i < numAIs; i++) {
         Village *village = new Village(i, i, 100, nullptr);
         AIs.push_back(new AI(village));
     }
@@ -96,10 +98,23 @@ int main() {
     int numKnights;
     int numWizards;
 
+    Village *targetVillage = nullptr;
+    std::vector<Troop> troops;
     // Game loop
     bool gameIsRunning = true;
     while (gameIsRunning) {
         for (auto &player : players) {
+            //friendly troops arrival
+
+
+
+
+
+            //enemy troops arival
+
+
+
+
             player->village->earnResources();
             //want to output all resources and troops;
             std::cout << "Village of "<< player;
@@ -189,12 +204,14 @@ int main() {
             std::cout << "Level of Gold Mine: "<<goldMineLevel;
             std::cout << "Level of Lumber MIll: "<<lumberMillLevel;
             std::cout << "######################\n\n";
-            std::cout << "1. Build or Upgrade Buildings";
-            std::cout << "2. Train Troops";
-            std::cout << "3. Attack Village";
-            std::cout << "4. Surrender Village";
-            std::cout << "5. Pass Turn\n";
             do{
+
+                std::cout << "1. Build or Upgrade Buildings";
+                std::cout << "2. Train Troops";
+                std::cout << "3. Attack Village";
+                std::cout << "4. Surrender Village";
+                std::cout << "5. Pass Turn\n";
+
                 std::cout << "Enter your choice: ";
                 std::cin >> playerChoice;
                 switch(playerChoice){
@@ -244,7 +261,7 @@ int main() {
                             std::cin >> y;
 
                             // Search for the village the player selected
-                            Village *targetVillage = nullptr;
+
                             for (auto &village : villages) {
                                 if (village.x == x && village.y == y) {
                                     targetVillage = &village;
@@ -298,7 +315,7 @@ int main() {
                                 }
                             }while(correct == false);
 
-                            std::vector<Troop> troops;
+
                             for (int i = 0; i < numArchers; i++) {
                                 troops.push_back(Troop("Archer", 100, 5, 2, 2, numArchers));
                             }
@@ -309,13 +326,14 @@ int main() {
                                 troops.push_back(Troop("Knight", 100, 10, 5, 6, numKnights));
                             }
 
-
                             // Now you can call the attack method
-                            player->village.attack(*targetVillage, troops);
+                            player->village->attack(*targetVillage, troops);
                             turn=true;
                             break;
 
-                    case 4: map.removeVillage(player->village);
+
+                    case 4:
+                            map.removeVillage(player->village);
                             std::cout<< "Village of "<< player<<"has been distroyed";
                             turn=true;
                             break;
@@ -324,14 +342,30 @@ int main() {
                             break;
 
                     default: std::cout<< "Invalid Choice";
+                             break;
 
                 }
             }while(turn == false);
             turn = false;
         }
+
         for (auto aiPlayer : AIs) {
             aiPlayer->takeTurn();
         }
+
+        // Check for win condition
+        if (villages.size() == 1) {
+            std::cout << "The owner of village " << villages[0].owner << " has won the game!" << std::endl;
+            gameIsRunning = false;
+        }
+
+        //marching
+
+
+        //end round
+
+
+        //start round
 
     }
 
