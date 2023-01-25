@@ -500,7 +500,10 @@ public:
     std::uniform_int_distribution<> dist;
     std::random_device rd;
 
-    AI(Village* village) : village(village), gen(rd()), dist(0, MAP_WIDTH*MAP_HEIGHT-1) {}
+    //AI(Village* village) : village(village), gen(rd()), dist(0, MAP_WIDTH*MAP_HEIGHT-1) {}
+    AI(Village *village) : village(village) { }
+
+
 
     Village* selectRandomVillage() {
         int villageIndex = dist(gen);

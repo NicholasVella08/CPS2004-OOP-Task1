@@ -30,51 +30,96 @@ int main() {
     std::cout << "Enter the number of AIs: ";
     std::cin >> numAIs;
 
+    std::cout << "1";
     // Create the player and AI objects
     std::vector<Player*> players;
+    std::cout << "2";
     std::vector<AI*> AIs;
+    std::cout << "3";
     std::vector<Village> villages;
+    std::cout << "4";
     for (int i = 1; i <= numPlayers; i++) {
+        std::cout <<i<< "1";
         std::string playerName;
+        std::cout <<i<< "2";
         std::cout << "Enter the name of player " << i << ": ";
+        std::cout <<i<< "3";
         std::cin >> playerName;
+        std::cout <<i<< "4";
         players.push_back(new Player(playerName));
+        std::cout <<i<< "5";
     }
+//    for (int i = 0; i < numAIs; i++) {
+//        Village *village = new Village(i, i, 100, nullptr);
+//        std::cout <<i<< "1";
+//        //AIs[i]->village = village;
+//        //AIs.push_back(new AI(village));
+//        //AIs.push_back(std::make_unique<AI>(village));
+//        //AIs.push_back(new AI(village));
+//        AIs.push_back(new AI(AIs[i]->village));
+//
+//        std::cout <<i<< "2";
+//    }
     for (int i = 0; i < numAIs; i++) {
+        // Create a new village for the AI
+
         Village *village = new Village(i, i, 100, nullptr);
+        // Create a new AI object and store it in the AIs vector
         AIs.push_back(new AI(village));
+
     }
 
 
-// Place the villages on the map
     std::vector<std::pair<int, int>> villageLocations;
+
     for (int i = 0; i < numPlayers; i++) {
-        int index = dist(gen);
-        int x = index % MAP_WIDTH;
-        int y = index / MAP_WIDTH;
-        while (std::find(villageLocations.begin(), villageLocations.end(), std::make_pair(x, y)) != villageLocations.end()) {
-            index = dist(gen);
+
+        int x, y;
+        do {
+
+            int index = dist(gen);
+
             x = index % MAP_WIDTH;
+
             y = index / MAP_WIDTH;
-        }
+
+        } while (std::find(villageLocations.begin(), villageLocations.end(), std::make_pair(x, y)) != villageLocations.end());
+
         Village* village = new Village(x, y, 100, players[i]);
+
         villageLocations.emplace_back(x, y);
+
         map.addVillage(village, x, y);
+
     }
+
+
+    //std::vector<std::pair<int, int>> villageLocations;
+    std::cout << "start village mapping";
     for (int i = 0; i < numAIs; i++) {
-        int index = dist(gen);
-        int x = index % MAP_WIDTH;
-        int y = index / MAP_WIDTH;
-        while (std::find(villageLocations.begin(), villageLocations.end(), std::make_pair(x, y)) != villageLocations.end()) {
-            index = dist(gen);
+        std::cout <<i<< "-1, ";
+        int x, y;
+        do {
+            std::cout <<i<< "-2, ";
+            int index = dist(gen);
+            std::cout <<i<< "-3, ";
             x = index % MAP_WIDTH;
-            y = index / MAP_HEIGHT;
-        }
+            std::cout <<i<< "-4, ";
+            y = index / MAP_WIDTH;
+            std::cout <<i<< "-5, ";
+        } while (std::find(villageLocations.begin(), villageLocations.end(), std::make_pair(x, y)) != villageLocations.end());
+        std::cout <<i<< "-6, ";
         AIs[i]->village->x = x;
+        std::cout <<i<< "-7, ";
         AIs[i]->village->y = y;
+        std::cout <<i<< "-8, ";
         map.addVillage(AIs[i]->village, x, y);
+        std::cout <<i<< "-9, ";
         villageLocations.emplace_back(x, y);
+        std::cout <<i<< "-10, ";
+
     }
+
 
     bool turn=false;
     bool correct =false;
@@ -103,12 +148,13 @@ int main() {
     // Game loop
     bool gameIsRunning = true;
     while (gameIsRunning) {
+        std::cout << "strat game";
         for (auto &player : players) {
             //friendly troops arrival
 
 
 
-
+            std::cout << "player turn ";
 
             //enemy troops arival
 
@@ -116,6 +162,7 @@ int main() {
 
 
             player->village->earnResources();
+            std::cout << "earn resource ";
             //want to output all resources and troops;
             std::cout << "Village of "<< player;
             foodAmount = 0;
