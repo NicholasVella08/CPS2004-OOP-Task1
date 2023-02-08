@@ -19,7 +19,7 @@ int main() {
     // Prompt the user for the number of players
     int numPlayers;
     do {
-        std::cout << "Enter the number of players (at least one): ";
+        std::cout << "Enter the number of players (at least one):\n ";
         std::cin >> numPlayers;
     }while(numPlayers<1);
 
@@ -27,39 +27,20 @@ int main() {
 
     // Prompt the user for the number of AIs
     int numAIs;
-    std::cout << "Enter the number of AIs: ";
+    std::cout << "Enter the number of AIs: \n";
     std::cin >> numAIs;
 
-    std::cout << "1";
     // Create the player and AI objects
     std::vector<Player*> players;
-    std::cout << "2";
     std::vector<AI*> AIs;
-    std::cout << "3";
     std::vector<Village> villages;
-    std::cout << "4";
     for (int i = 1; i <= numPlayers; i++) {
-        std::cout <<i<< "1";
         std::string playerName;
-        std::cout <<i<< "2";
         std::cout << "Enter the name of player " << i << ": ";
-        std::cout <<i<< "3";
         std::cin >> playerName;
-        std::cout <<i<< "4";
         players.push_back(new Player(playerName));
-        std::cout <<i<< "5";
     }
-//    for (int i = 0; i < numAIs; i++) {
-//        Village *village = new Village(i, i, 100, nullptr);
-//        std::cout <<i<< "1";
-//        //AIs[i]->village = village;
-//        //AIs.push_back(new AI(village));
-//        //AIs.push_back(std::make_unique<AI>(village));
-//        //AIs.push_back(new AI(village));
-//        AIs.push_back(new AI(AIs[i]->village));
-//
-//        std::cout <<i<< "2";
-//    }
+
     for (int i = 0; i < numAIs; i++) {
         // Create a new village for the AI
 
@@ -71,6 +52,9 @@ int main() {
 
 
     std::vector<std::pair<int, int>> villageLocations;
+
+    std::vector<std::string> buildingTypes = {"Farm", "Gold Mine", "Lumber Mill"};
+    std::vector<std::string> resourceTypes = {"Gold", "Wood", "Food"};
 
     for (int i = 0; i < numPlayers; i++) {
 
@@ -87,38 +71,52 @@ int main() {
 
         Village* village = new Village(x, y, 100, players[i]);
 
+        players[i]->village = village;
+
+
         villageLocations.emplace_back(x, y);
 
         map.addVillage(village, x, y);
+
+
+        players[i]->troops.emplace_back(Troop("Archer", 10, 5, 2, 2, 0));
+        players[i]->troops.emplace_back(Troop("Knight", 10, 10, 5, 6, 0));
+        players[i]->troops.emplace_back(Troop("Wizard", 10, 15, 10, 4, 0));
+
+        //Initialize Buildings
+        for (const std::string &buildingType: buildingTypes) {
+            players[i]->buildings.emplace_back(Building(buildingType, 0));
+        }
+
+
+        //Initialize Resources
+        for (const std::string &resourceType: resourceTypes) {
+            players[i]->resources.emplace_back(Resource(resourceType, 10));
+        }
+
 
     }
 
 
     //std::vector<std::pair<int, int>> villageLocations;
-    std::cout << "start village mapping";
+    std::cout << "start village mapping\n";
     for (int i = 0; i < numAIs; i++) {
-        std::cout <<i<< "-1, ";
         int x, y;
         do {
-            std::cout <<i<< "-2, ";
             int index = dist(gen);
-            std::cout <<i<< "-3, ";
             x = index % MAP_WIDTH;
-            std::cout <<i<< "-4, ";
             y = index / MAP_WIDTH;
-            std::cout <<i<< "-5, ";
         } while (std::find(villageLocations.begin(), villageLocations.end(), std::make_pair(x, y)) != villageLocations.end());
-        std::cout <<i<< "-6, ";
         AIs[i]->village->x = x;
-        std::cout <<i<< "-7, ";
         AIs[i]->village->y = y;
-        std::cout <<i<< "-8, ";
         map.addVillage(AIs[i]->village, x, y);
-        std::cout <<i<< "-9, ";
         villageLocations.emplace_back(x, y);
-        std::cout <<i<< "-10, ";
+
+
 
     }
+
+
 
 
     bool turn=false;
@@ -127,9 +125,9 @@ int main() {
     int buildingChoice;
     int troopChoice;
 
-    int foodAmount;
-    int goldAmount;
-    int woodAmount;
+    int foodAmount = 0;
+    int goldAmount = 0;
+    int woodAmount = 0;
 
     int archerAmount;
     int knightAmount;
@@ -145,26 +143,35 @@ int main() {
 
     Village *targetVillage = nullptr;
     std::vector<Troop> troops;
+
+
     // Game loop
     bool gameIsRunning = true;
     while (gameIsRunning) {
-        std::cout << "strat game";
+        std::cout << "start game\n";
+
+
+
         for (auto &player : players) {
             //friendly troops arrival
 
 
 
-            std::cout << "player turn ";
+            std::cout << "player turn \n";
 
             //enemy troops arival
 
 
 
 
-            player->village->earnResources();
-            std::cout << "earn resource ";
+            if(player && player->village)
+                player->village->earnResources();
+                std::cout << "earn resource ";
+
+
+
             //want to output all resources and troops;
-            std::cout << "Village of "<< player;
+            std::cout << "Village of "<< player->name<<"\n";
             foodAmount = 0;
             goldAmount = 0;
             woodAmount = 0;
@@ -196,6 +203,10 @@ int main() {
                     break;
                 }
             }
+
+            std::cout << "Total Food: "<<foodAmount;
+            std::cout << "\nTotal Gold: "<<goldAmount;
+            std::cout << "\nTotal Wood: "<<woodAmount<<"\n";
 
             for (const Troop& troop : player->village->troops) {
                 if (troop.type == "Archers") {
@@ -239,34 +250,32 @@ int main() {
                 }
             }
 
-            std::cout << "Total Food: "<<foodAmount;
-            std::cout << "Total Gold: "<<goldAmount;
-            std::cout << "Total Wood: "<<woodAmount;
-            std::cout << "----------------------";
+
+            std::cout << "----------------------\n";
             std::cout << "Total Archers: "<<archerAmount;
-            std::cout << "Total Knights: "<<knightAmount;
-            std::cout << "Total Wizards: "<<wizardAmount;
-            std::cout << "----------------------";
-            std::cout << "Level of Farm: "<<farmLevel;
-            std::cout << "Level of Gold Mine: "<<goldMineLevel;
-            std::cout << "Level of Lumber MIll: "<<lumberMillLevel;
-            std::cout << "######################\n\n";
+            std::cout << "\nTotal Knights: "<<knightAmount;
+            std::cout << "\nTotal Wizards: "<<wizardAmount<<"\n";
+            std::cout << "----------------------\n";
+            std::cout << "\nLevel of Farm: "<<farmLevel;
+            std::cout << "\nLevel of Gold Mine: "<<goldMineLevel;
+            std::cout << "\nLevel of Lumber MIll: "<<lumberMillLevel;
+            std::cout << "\n######################\n\n";
             do{
 
-                std::cout << "1. Build or Upgrade Buildings";
-                std::cout << "2. Train Troops";
-                std::cout << "3. Attack Village";
-                std::cout << "4. Surrender Village";
-                std::cout << "5. Pass Turn\n";
+                std::cout << "1. Build or Upgrade Buildings\n";
+                std::cout << "2. Train Troops\n";
+                std::cout << "3. Attack Village\n";
+                std::cout << "4. Surrender Village\n";
+                std::cout << "5. Pass Turn\n\n";
 
-                std::cout << "Enter your choice: ";
+                std::cout << "Enter your choice: \n";
                 std::cin >> playerChoice;
                 switch(playerChoice){
-                    case 1: std::cout << "1. Farm";
-                            std::cout << "2. Gold Mine ";
-                            std::cout << "3. Lumber MIll ";
+                    case 1: std::cout << "\n1. Farm\n";
+                            std::cout << "2. Gold Mine \n";
+                            std::cout << "3. Lumber MIll \n";
 
-                            std::cout << "Which building you want to build or upgrade: ";
+                            std::cout << "Which building you want to build or upgrade: \n";
                             std::cin >> buildingChoice;
 
                             switch(buildingChoice){
@@ -276,13 +285,13 @@ int main() {
                                         break;
                                 case 3: turn = player->village->buildOrUpgradeBuilding("Lumber Mill");
                                         break;
-                                default: std::cout<< "Invalid Choice";
+                                default: std::cout<< "Invalid Choice\n";
                             }
                             break;
-                    case 2: std::cout << "1. Archer";
-                            std::cout << "2. Knight ";
-                            std::cout << "3. Wizard ";
-                            std::cout << "What troop do you like to train: ";
+                    case 2: std::cout << "1. Archer\n";
+                            std::cout << "2. Knight \n";
+                            std::cout << "3. Wizard \n";
+                            std::cout << "What troop do you like to train: \n";
                             std::cin >> troopChoice;
 
                             switch(troopChoice){
@@ -292,7 +301,7 @@ int main() {
                                     break;
                                 case 3: turn = player->village->trainTroop("Wizard");
                                     break;
-                                default: std::cout<< "Invalid Choice";
+                                default: std::cout<< "Invalid Choice\n";
                             }
                             break;
 
@@ -300,10 +309,10 @@ int main() {
                                 std::cout << "Village at x: " << village.x << ", y: " << village.y << std::endl;
                             }
 
-                            std::cout << "Select a village to attack by entering its x-coordinate: ";
+                            std::cout << "Select a village to attack by entering its x-coordinate: \n";
                             int x;
                             std::cin >> x;
-                            std::cout << "Select a village to attack by entering its y-coordinate: ";
+                            std::cout << "Select a village to attack by entering its y-coordinate: \n";
                             int y;
                             std::cin >> y;
 
@@ -318,16 +327,16 @@ int main() {
 
                             // Make sure a valid village was selected
                             if (targetVillage == nullptr) {
-                                std::cout << "Invalid village selected." << std::endl;
+                                std::cout << "Invalid village selected.\n" << std::endl;
 
                             }
 
                             do{
-                                std::cout << "Enter the number of archers you want to use for the attack: ";
+                                std::cout << "Enter the number of archers you want to use for the attack: \n";
 
                                 std::cin >> numArchers;
                                 if(numArchers > archerAmount){
-                                    std::cout << "You don't have that amount of archers: ";
+                                    std::cout << "You don't have that amount of archers: \n";
                                     numArchers = 0;
                                     correct =false;
                                 }else{
@@ -337,11 +346,11 @@ int main() {
 
 
                             do{
-                                std::cout << "Enter the number of knights you want to use for the attack: ";
+                                std::cout << "Enter the number of knights you want to use for the attack: \n";
 
                                 std::cin >> numKnights;
                                 if(numKnights > knightAmount){
-                                    std::cout << "You don't have that amount of knights: ";
+                                    std::cout << "You don't have that amount of knights: \n";
                                     numKnights = 0;
                                     correct =false;
                                 }else{
@@ -350,11 +359,11 @@ int main() {
                             }while(correct == false);
 
                             do{
-                                std::cout << "Enter the number of wizards you want to use for the attack: ";
+                                std::cout << "Enter the number of wizards you want to use for the attack: \n";
 
                                 std::cin >> numWizards;
                                 if(numWizards > wizardAmount){
-                                    std::cout << "You don't have that amount of wizards: ";
+                                    std::cout << "You don't have that amount of wizards: \n";
                                     numWizards = 0;
                                     correct =false;
                                 }else{
@@ -381,22 +390,23 @@ int main() {
 
                     case 4:
                             map.removeVillage(player->village);
-                            std::cout<< "Village of "<< player<<"has been distroyed";
+                            std::cout<< "Village of "<< player<<"has been distroyed\n";
                             turn=true;
                             break;
 
                     case 5: turn = true;
                             break;
 
-                    default: std::cout<< "Invalid Choice";
+                    default: std::cout<< "Invalid Choice\n";
                              break;
 
                 }
-            }while(turn == false);
+            }while(!turn);
             turn = false;
         }
 
         for (auto aiPlayer : AIs) {
+            std::cout << "ai turn";
             aiPlayer->takeTurn();
         }
 
