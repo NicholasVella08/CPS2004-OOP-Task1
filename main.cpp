@@ -79,19 +79,19 @@ int main() {
         map.addVillage(village, x, y);
 
 
-        players[i]->troops.emplace_back(Troop("Archer", 10, 5, 2, 2, 0));
-        players[i]->troops.emplace_back(Troop("Knight", 10, 10, 5, 6, 0));
-        players[i]->troops.emplace_back(Troop("Wizard", 10, 15, 10, 4, 0));
+        players[i]->village->troops.emplace_back(Troop("Archer", 10, 5, 2, 2, 0));
+        players[i]->village->troops.emplace_back(Troop("Knight", 10, 10, 5, 6, 0));
+        players[i]->village->troops.emplace_back(Troop("Wizard", 10, 15, 10, 4, 0));
 
         //Initialize Buildings
         for (const std::string &buildingType: buildingTypes) {
-            players[i]->buildings.emplace_back(Building(buildingType, 0));
+            players[i]->village->buildings.emplace_back(Building(buildingType, 0));
         }
 
 
         //Initialize Resources
         for (const std::string &resourceType: resourceTypes) {
-            players[i]->resources.emplace_back(Resource(resourceType, 10));
+            players[i]->village->resources.emplace_back(Resource(resourceType, 40));
         }
 
 
@@ -183,21 +183,21 @@ int main() {
             lumberMillLevel = 0;
 
 
-            for (const Resource &resource : player->resources) {
+            for (const Resource &resource : player->village->resources) {
                 if (resource.type == "Food") {
                     foodAmount = resource.amount;
                     break;
                 }
             }
 
-            for (const Resource &resource : player->resources) {
+            for (const Resource &resource : player->village->resources) {
                 if (resource.type == "Gold") {
                     goldAmount = resource.amount;
                     break;
                 }
             }
 
-            for (const Resource &resource : player->resources) {
+            for (const Resource &resource : player->village->resources) {
                 if (resource.type == "Wood") {
                     woodAmount = resource.amount;
                     break;
@@ -279,7 +279,11 @@ int main() {
                             std::cin >> buildingChoice;
 
                             switch(buildingChoice){
-                                case 1: turn = player->village->buildOrUpgradeBuilding("Farm");
+                                case 1: if (foodAmount >= 10) { // 10 is the cost of training an Archer
+                                            turn = player->village->trainTroop("Archer");
+                                        } else {
+                                            std::cout << "You don't have enough food to train an Archer.\n";
+                                        }
                                         break;
                                 case 2: turn = player->village->buildOrUpgradeBuilding("Gold Mine");
                                         break;
@@ -389,16 +393,21 @@ int main() {
 
 
                     case 4:
-                            map.removeVillage(player->village);
-                            std::cout<< "Village of "<< player<<"has been distroyed\n";
-                            turn=true;
-                            break;
+                            auto playerIter = std::find(players.begin(), players.end(), player);
+                            if (playerIter != players.end()) {
+                                map.removeVillage((*playerIter)->village);
+                                delete (*playerIter);
+                                players.erase(playerIter);
+                                std::cout << "Player and all associated objects have been destroyed.\n";
+                                turn = true;
+                            }
+//
 
                     case 5: turn = true;
                             break;
 
                     default: std::cout<< "Invalid Choice\n";
-                             break;
+
 
                 }
             }while(!turn);

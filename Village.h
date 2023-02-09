@@ -107,6 +107,7 @@ public:
             x(x), y(y), health(health), owner(owner) {}
 
     bool trainTroop(const std::string &type) {
+        std::cout << "1";
         int cost = 0;
         int carryingCapacity = 0;
         int attack = 0;
@@ -131,52 +132,145 @@ public:
             return false;  // Invalid troop type
         }
 
-        // Check if the village has enough resources to train the troop
+        std::cout << "2";
+        //Check if the village has enough resources to train the troop
+//        int food = 0;
+//        for (const Resource &resource: resources) {
+//            if (resource.type == "Food") {
+//                food += resource.amount;
+//            }
+//        }
+//        std::cout << "3";
+//
+//        if (food < cost) {
+//            std::cout << "You don't have enough resources \n";
+//            return false;  // Return nullptr if the village doesn't have enough resources
+//        }
+//
+//        std::cout << "4";
+//        // check if the troop type already exist
+//        for (auto &troop: troops) {
+//            std::cout << "5";
+//            if (troop.type == type) {
+//                std::cout << "6";
+//                // remove the training resources
+//                for (auto it = resources.begin(); it != resources.end();) {
+//                    std::cout << "7";
+//                    if (it->type == "Food") {
+//                        std::cout << "8";
+//                        if (it->amount > cost) {
+//                            std::cout << "9";
+//                            it->amount -= cost;
+//                            std::cout << "10";
+//                        } else {
+//                            std::cout << "11";
+//                            resources.erase(it);
+//                            std::cout << "12";
+//                        }
+//                        std::cout << "13";
+//                        break;
+//                    }
+//                }
+//                // add the amount of the troops
+//                std::cout << "A " << type << " was added successfully to your troop.";
+//                troop.amount++;
+//                return true;
+//            }
+//        }
+
         int food = 0;
         for (const Resource &resource: resources) {
             if (resource.type == "Food") {
                 food += resource.amount;
             }
         }
+
         if (food < cost) {
             std::cout << "You don't have enough resources \n";
-            return false;  // Return nullptr if the village doesn't have enough resources
+            return false;  // Return false if the village doesn't have enough resources
         }
 
-        // check if the troop type already exist
+// check if the troop type already exist
         for (auto &troop: troops) {
             if (troop.type == type) {
-                // remove the training resources
-                for (auto it = resources.begin(); it != resources.end();) {
+                bool food_found = false;
+                for (auto it = resources.begin(); it != resources.end(); ++it) {
                     if (it->type == "Food") {
-                        if (it->amount > cost) {
+                        if (it->amount >= cost) {
                             it->amount -= cost;
-                        } else {
-                            resources.erase(it);
+                            food_found = true;
+                            break;
                         }
-                        break;
                     }
                 }
-                // add the amount of the troops
-                std::cout << "A " << type << " was added successfully to your troop.";
-                troop.amount++;
-                return true;
+
+
             }
         }
-        // If the troop type doesn't exist, remove the training resources from the village's resources and create a new troop
-        for (auto it = resources.begin(); it != resources.end(); ++it) {
-            if (it->type == "Food") {
-                if (it->amount > cost) {
-                    it->amount -= cost;
-                } else {
-                    resources.erase(it);
-                }
-                break;
-            }
+        auto iter = std::find_if(troops.begin(), troops.end(), [&](const Troop &r) { return r.type == type; });
+        if (iter != troops.end()) {
+            iter->amount += 2;
+            std::cout<<"hello";
         }
-        Troop *newTroop = new Troop(type, 100, attack, carryingCapacity, marchingSpeed, 1);
-        troops.push_back(*newTroop);
+
+
+        std::cout << "A " << type << " was added successfully to your troop.";
         return true;
+
+
+
+
+
+
+
+
+
+
+//        for (auto it = resources.begin(); it != resources.end();) {
+//            std::cout << "3";
+//            if (it->type == "Food") {
+//                std::cout << "4";
+//                if (it->amount > cost) {
+//                    std::cout << "5";
+//                    it->amount -= cost;
+//                    std::cout << "6";
+//                } else {
+//                    std::cout << "7";
+//                    resources.erase(it);
+//                    std::cout << "8";
+//                    break;
+//                }
+//                std::cout << "9";
+//                for (auto &troop : troops) {
+//                    std::cout << "10";
+//                    if (troop.type == type) {
+//                        std::cout << "11";
+//                        troop.amount++;
+//                        std::cout << "12";
+//                        return true;
+//                        break;
+//                    }
+//                }
+//                break;
+//            }
+//        }
+
+        // If the troop type doesn't exist, remove the training resources from the village's resources and create a new troop
+//        for (auto it = resources.begin(); it != resources.end(); ++it) {
+//            if (it->type == "Food") {
+//                if (it->amount > cost) {
+//                    it->amount -= cost;
+//                } else {
+//                    resources.erase(it);
+//                }
+//                break;
+//            }
+//        }
+//        std::cout << "6";
+//        Troop *newTroop = new Troop(type, 100, attack, carryingCapacity, marchingSpeed, 1);
+//        troops.push_back(*newTroop);
+//        std::cout << "7";
+//        return true;
     }
 
 
