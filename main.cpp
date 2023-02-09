@@ -107,10 +107,26 @@ int main() {
             x = index % MAP_WIDTH;
             y = index / MAP_WIDTH;
         } while (std::find(villageLocations.begin(), villageLocations.end(), std::make_pair(x, y)) != villageLocations.end());
+
         AIs[i]->village->x = x;
         AIs[i]->village->y = y;
         map.addVillage(AIs[i]->village, x, y);
         villageLocations.emplace_back(x, y);
+
+        AIs[i]->village->troops.emplace_back(Troop("Archer", 10, 5, 2, 2, 0));
+        AIs[i]->village->troops.emplace_back(Troop("Knight", 10, 10, 5, 6, 0));
+        AIs[i]->village->troops.emplace_back(Troop("Wizard", 10, 15, 10, 4, 0));
+
+        //Initialize Buildings
+        for (const std::string &buildingType: buildingTypes) {
+            AIs[i]->village->buildings.emplace_back(Building(buildingType, 0));
+        }
+
+
+        //Initialize Resources
+        for (const std::string &resourceType: resourceTypes) {
+            AIs[i]->village->resources.emplace_back(Resource(resourceType, 40));
+        }
 
 
 
@@ -141,23 +157,28 @@ int main() {
     int numKnights;
     int numWizards;
 
+    bool deletePlayer = false;
+
     Village *targetVillage = nullptr;
     std::vector<Troop> troops;
 
+    int round = 1;
 
     // Game loop
     bool gameIsRunning = true;
     while (gameIsRunning) {
-        std::cout << "start game\n";
+        std::cout << "Round "<<round<<" has started.\n";
 
 
 
         for (auto &player : players) {
+            std::cout << "Village of "<< player->name<<"\n";
+
             //friendly troops arrival
 
 
 
-            std::cout << "player turn \n";
+
 
             //enemy troops arival
 
@@ -166,12 +187,12 @@ int main() {
 
             if(player && player->village)
                 player->village->earnResources();
-                std::cout << "earn resource ";
+                std::cout << "Resource earned from buildings\n";
 
 
 
             //want to output all resources and troops;
-            std::cout << "Village of "<< player->name<<"\n";
+
             foodAmount = 0;
             goldAmount = 0;
             woodAmount = 0;
@@ -181,6 +202,7 @@ int main() {
             farmLevel = 0;
             goldMineLevel = 0;
             lumberMillLevel = 0;
+
 
 
             for (const Resource &resource : player->village->resources) {
@@ -203,29 +225,24 @@ int main() {
                     break;
                 }
             }
-
-            std::cout << "Total Food: "<<foodAmount;
-            std::cout << "\nTotal Gold: "<<goldAmount;
-            std::cout << "\nTotal Wood: "<<woodAmount<<"\n";
-
-            for (const Troop& troop : player->village->troops) {
-                if (troop.type == "Archers") {
-                    archerAmount += troop.amount;
+            for (const Troop &troop : player->village->troops) {
+                if (troop.type == "Archer") {
+                    archerAmount = troop.amount;
+                    break;
                 }
             }
-
-            for (const Troop& troop : player->village->troops) {
-                if (troop.type == "Knights") {
-                    knightAmount += troop.amount;
+            for (const Troop &troop : player->village->troops) {
+                if (troop.type == "Knight") {
+                    knightAmount = troop.amount;
+                    break;
                 }
             }
-
-            for (const Troop& troop : player->village->troops) {
-                if (troop.type == "Wizards") {
-                    wizardAmount += troop.amount;
+            for (const Troop &troop : player->village->troops) {
+                if (troop.type == "Wizard") {
+                    wizardAmount = troop.amount;
+                    break;
                 }
             }
-
 
             for (const Building& building : player->village->buildings) {
                 if (building.type == "Farm") {
@@ -250,16 +267,20 @@ int main() {
                 }
             }
 
-
+            std::cout << "\n==========================\n";
+            std::cout << "Total Food: "<<foodAmount;
+            std::cout << "\nTotal Gold: "<<goldAmount;
+            std::cout << "\nTotal Wood: "<<woodAmount<<"\n";
             std::cout << "----------------------\n";
-            std::cout << "Total Archers: "<<archerAmount;
+            std::cout << "\nTotal Archers: "<<archerAmount;
             std::cout << "\nTotal Knights: "<<knightAmount;
-            std::cout << "\nTotal Wizards: "<<wizardAmount<<"\n";
-            std::cout << "----------------------\n";
+            std::cout << "\nTotal Wizards: "<<wizardAmount;
+            std::cout << "\n----------------------\n";
             std::cout << "\nLevel of Farm: "<<farmLevel;
             std::cout << "\nLevel of Gold Mine: "<<goldMineLevel;
             std::cout << "\nLevel of Lumber MIll: "<<lumberMillLevel;
             std::cout << "\n######################\n\n";
+
             do{
 
                 std::cout << "1. Build or Upgrade Buildings\n";
@@ -279,12 +300,8 @@ int main() {
                             std::cin >> buildingChoice;
 
                             switch(buildingChoice){
-                                case 1: if (foodAmount >= 10) { // 10 is the cost of training an Archer
-                                            turn = player->village->trainTroop("Archer");
-                                        } else {
-                                            std::cout << "You don't have enough food to train an Archer.\n";
-                                        }
-                                        break;
+                                case 1: turn = player->village->buildOrUpgradeBuilding("Farm");
+                                    break;
                                 case 2: turn = player->village->buildOrUpgradeBuilding("Gold Mine");
                                         break;
                                 case 3: turn = player->village->buildOrUpgradeBuilding("Lumber Mill");
@@ -309,71 +326,91 @@ int main() {
                             }
                             break;
 
-                    case 3: for (const auto &village : villages) {
-                                std::cout << "Village at x: " << village.x << ", y: " << village.y << std::endl;
+                    case 3:
+
+                        for (const auto &player : players) {
+                            std::cout << "Villages for player " << player->name << ": " << std::endl;
+                            std::cout << "Village at x: " << player->village->x << ", y: " << player->village->y << std::endl;
+
+                        }
+
+                        for (const auto &aiplayer : AIs) {
+                            std::cout << "Villages for AI player " << aiplayer << ": " << std::endl;
+                            std::cout << "Village at x: " << aiplayer->village->x << ", y: " << aiplayer->village->y << std::endl;
+
+                        }
+
+
+                        std::cout << "Select a village to attack by entering its x-coordinate: \n";
+                        int x;
+                        std::cin >> x;
+                        std::cout << "Select a village to attack by entering its y-coordinate: \n";
+                        int y;
+                        std::cin >> y;
+
+                        // Search for the village the player selected
+                        for (const auto &player : players) {
+                            if (player->village->x == x && player->village->y == y) {
+                                targetVillage = player->village;
+                                break;
                             }
 
-                            std::cout << "Select a village to attack by entering its x-coordinate: \n";
-                            int x;
-                            std::cin >> x;
-                            std::cout << "Select a village to attack by entering its y-coordinate: \n";
-                            int y;
-                            std::cin >> y;
+                        }
 
-                            // Search for the village the player selected
-
-                            for (auto &village : villages) {
-                                if (village.x == x && village.y == y) {
-                                    targetVillage = &village;
-                                    break;
-                                }
+                        for (const auto &aiplayer : AIs) {
+                            if (aiplayer->village->x == x && aiplayer->village->y == y) {
+                                targetVillage = aiplayer->village;
+                                break;
                             }
 
-                            // Make sure a valid village was selected
-                            if (targetVillage == nullptr) {
-                                std::cout << "Invalid village selected.\n" << std::endl;
+                        }
 
+                        // Make sure a valid village was selected
+                        if (targetVillage == nullptr) {
+                            std::cout << "Invalid village selected.\n" << std::endl;
+                            turn= false;
+                            break;
+                        }
+
+                        do{
+                            std::cout << "Enter the number of archers you want to use for the attack: \n";
+
+                            std::cin >> numArchers;
+                            if(numArchers > archerAmount){
+                                std::cout << "You don't have that amount of archers: \n";
+                                numArchers = 0;
+                                correct =false;
+                            }else{
+                                correct = true;
                             }
-
-                            do{
-                                std::cout << "Enter the number of archers you want to use for the attack: \n";
-
-                                std::cin >> numArchers;
-                                if(numArchers > archerAmount){
-                                    std::cout << "You don't have that amount of archers: \n";
-                                    numArchers = 0;
-                                    correct =false;
-                                }else{
-                                    correct = true;
-                                }
-                            }while(correct == false);
+                        }while(correct == false);
 
 
-                            do{
-                                std::cout << "Enter the number of knights you want to use for the attack: \n";
+                        do{
+                            std::cout << "Enter the number of knights you want to use for the attack: \n";
 
-                                std::cin >> numKnights;
-                                if(numKnights > knightAmount){
-                                    std::cout << "You don't have that amount of knights: \n";
-                                    numKnights = 0;
-                                    correct =false;
-                                }else{
-                                    correct = true;
-                                }
-                            }while(correct == false);
+                            std::cin >> numKnights;
+                            if(numKnights > knightAmount){
+                                std::cout << "You don't have that amount of knights: \n";
+                                numKnights = 0;
+                                correct =false;
+                            }else{
+                                correct = true;
+                            }
+                        }while(correct == false);
 
-                            do{
-                                std::cout << "Enter the number of wizards you want to use for the attack: \n";
+                        do{
+                            std::cout << "Enter the number of wizards you want to use for the attack: \n";
 
-                                std::cin >> numWizards;
-                                if(numWizards > wizardAmount){
-                                    std::cout << "You don't have that amount of wizards: \n";
-                                    numWizards = 0;
-                                    correct =false;
-                                }else{
-                                    correct = true;
-                                }
-                            }while(correct == false);
+                            std::cin >> numWizards;
+                            if(numWizards > wizardAmount){
+                                std::cout << "You don't have that amount of wizards: \n";
+                                numWizards = 0;
+                                correct =false;
+                            }else{
+                                correct = true;
+                            }
+                        }while(correct == false);
 
 
                             for (int i = 0; i < numArchers; i++) {
@@ -393,14 +430,18 @@ int main() {
 
 
                     case 4:
-                            auto playerIter = std::find(players.begin(), players.end(), player);
-                            if (playerIter != players.end()) {
-                                map.removeVillage((*playerIter)->village);
-                                delete (*playerIter);
-                                players.erase(playerIter);
-                                std::cout << "Player and all associated objects have been destroyed.\n";
-                                turn = true;
+                            map.removeVillage(player->village);
+                            std::cout << "Village of " << player << "has been distroyed\n";
+                            turn = true;
+                            deletePlayer = true;
+                            if (deletePlayer==true) {
+                                auto playerIter = std::find(players.begin(), players.end(), player);
+                                if (playerIter != players.end()) {
+                                    delete *playerIter;
+                                    players.erase(playerIter);
+                                }
                             }
+                            break;
 //
 
                     case 5: turn = true;
@@ -410,19 +451,98 @@ int main() {
 
 
                 }
+
             }while(!turn);
+
+
             turn = false;
         }
 
         for (auto aiPlayer : AIs) {
-            std::cout << "ai turn";
+            std::cout << "\nAI turn\n";
+            foodAmount = 0;
+            goldAmount = 0;
+            woodAmount = 0;
+            archerAmount = 0;
+            knightAmount = 0;
+            wizardAmount = 0;
+            farmLevel = 0;
+            goldMineLevel = 0;
+            lumberMillLevel = 0;
+
+
+
+            for (const Resource &resource : aiPlayer->village->resources) {
+                if (resource.type == "Food") {
+                    foodAmount = resource.amount;
+                    break;
+                }
+            }
+
+            for (const Resource &resource : aiPlayer->village->resources) {
+                if (resource.type == "Gold") {
+                    goldAmount = resource.amount;
+                    break;
+                }
+            }
+
+            for (const Resource &resource : aiPlayer->village->resources) {
+                if (resource.type == "Wood") {
+                    woodAmount = resource.amount;
+                    break;
+                }
+            }
+            std::cout <<"\n============================";
+            std::cout << "\nTotal Food: "<<foodAmount;
+            std::cout << "\nTotal Gold: "<<goldAmount;
+            std::cout << "\nTotal Wood: "<<woodAmount<<"\n";
+
+
+
+
+            for (const Building& building : aiPlayer->village->buildings) {
+                if (building.type == "Farm") {
+                    farmLevel = building.level;
+                    break;
+                }
+            }
+
+
+            for (const Building& building : aiPlayer->village->buildings) {
+                if (building.type == "Gold Mine") {
+                    goldMineLevel = building.level;
+                    break;
+                }
+            }
+
+
+            for (const Building& building : aiPlayer->village->buildings) {
+                if (building.type == "Lumber Mill") {
+                    lumberMillLevel = building.level;
+                    break;
+                }
+            }
+
+
+            std::cout << "----------------------\n";
+            for (const Troop &troop : aiPlayer->village->troops) {
+                std::cout << "Total " << troop.type << " : " << troop.amount << std::endl;
+            }
+            std::cout << "----------------------\n";
+            std::cout << "\nLevel of Farm: "<<farmLevel;
+            std::cout << "\nLevel of Gold Mine: "<<goldMineLevel;
+            std::cout << "\nLevel of Lumber MIll: "<<lumberMillLevel;
+            std::cout << "\n######################\n\n";
             aiPlayer->takeTurn();
         }
 
         // Check for win condition
-        if (villages.size() == 1) {
-            std::cout << "The owner of village " << villages[0].owner << " has won the game!" << std::endl;
-            gameIsRunning = false;
+        if (map.villageLocations.size() == 1) {
+            auto lastVillage = map.villageLocations.begin()->first;
+            std::cout << "The winner is the owner of village at ("
+                      << lastVillage->x << ", " << lastVillage->y << ") "
+                       << std::endl;
+            break;
         }
 
         //marching
@@ -430,9 +550,9 @@ int main() {
 
         //end round
 
-
+        std::cout<<"Round "<<round<< " has ended\n";
         //start round
-
+        round++;
     }
 
     // Clean up memory
