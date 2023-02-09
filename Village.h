@@ -170,85 +170,229 @@ public:
 
     // Attack the given village with the given troops
     void attack(Village &targetVillage, std::vector<Troop> &troops) {
-        int totalAttackPower = 0;
-        int archersKilled = 0;
-        int knightsKilled = 0;
-        int wizardsKilled = 0;
+        //int totalAttackPower = 0;
+        int archersAttack = 0;
+        int knightsAttack = 0;
+        int wizardsAttack = 0;
+        int attackPower = 0;
+        int defensePower = 0;
+
         for (const Troop &troop: troops) {
-            totalAttackPower += troop.attack;
+
             if (troop.type == "Archer") {
-                archersKilled == troop.amount;
+                archersAttack = troop.amount;
             } else if (troop.type == "Knight") {
-                knightsKilled == troop.amount;
+                knightsAttack = troop.amount;
             } else if (troop.type == "Wizard") {
-                wizardsKilled == troop.amount;
+                wizardsAttack = troop.amount;
+            }
+
+        }
+        attackPower = (archersAttack*5)+(knightsAttack*10)+(wizardsAttack*15);
+
+        //int totalDefensePower = 0;
+        int archersDefense = 0;
+        int knightsDefense = 0;
+        int wizardsDefense = 0;
+        for (const Troop &troop: targetVillage.troops) {
+
+            if (troop.type == "Archer") {
+                archersDefense = troop.amount;
+            } else if (troop.type == "Knight") {
+                knightsDefense = troop.amount;;
+            } else if (troop.type == "Wizard") {
+                wizardsDefense = troop.amount;;
             }
         }
+        defensePower = (archersDefense*5)+(knightsDefense*10)+(wizardsDefense*15);
 
-        int totalDefensePower = 0;
-        int defenderArchersKilled = 0;
-        int defenderKnightsKilled = 0;
-        int defenderWizardsKilled = 0;
-        for (const Troop &troop: targetVillage.troops) {
-            totalDefensePower += troop.attack;
-            if (troop.type == "Archer") {
-                defenderArchersKilled++;
-            } else if (troop.type == "Knight") {
-                defenderKnightsKilled++;
-            } else if (troop.type == "Wizard") {
-                defenderWizardsKilled++;
+        if (attackPower > defensePower) {
+            std::cout << "Attacker wins!" << std::endl;
+
+            //defense troops all killed
+            archersDefense = 0;
+            knightsDefense = 0;
+            wizardsDefense = 0;
+
+
+
+            while(archersAttack!=0){
+                if(defensePower==0){
+                    break;
+                }
+                defensePower -= 5;
+                archersAttack--;
             }
+            while(knightsAttack!=0){
+                if(defensePower==0){
+                    break;
+                }
+                defensePower -= 10;
+                if(defensePower<0){
+                    break;
+                }
+                knightsAttack--;
+            }
+            while(wizardsAttack!=0){
+                if(defensePower==0){
+                    break;
+                }
+                defensePower -= 15;
+                if(defensePower<0){
+                    break;
+                }
+                wizardsAttack--;
+            }
+
+            int totalCarry=0;
+            int foodAmount =0;
+            int woodAmount =0;
+            int goldAmount =0;
+
+            int foodTaken =0;
+            int woodTaken =0;
+            int goldTaken =0;
+
+            totalCarry= archersAttack*2+knightsAttack*5+wizardsAttack*10;
+            for (const Resource &resource : targetVillage.resources) {
+                if (resource.type == "Food") {
+                    foodAmount = resource.amount;
+
+                }
+                if (resource.type == "Wood") {
+                    woodAmount = resource.amount;
+
+                }
+                if (resource.type == "Gold") {
+                    goldAmount = resource.amount;
+
+                }
+            }
+
+            while(totalCarry>0){
+                if(foodAmount>0){
+                    foodAmount--;
+                    foodTaken++;
+                    totalCarry--;
+                    continue;
+                }
+                if(woodAmount>0){
+                    woodAmount--;
+                    woodTaken++;
+                    totalCarry--;
+                    continue;
+                }
+                if(goldAmount>0){
+                    goldAmount--;
+                    goldTaken++;
+                    totalCarry--;
+                    continue;
+                }
+            }
+
+
+
+            std::cout << "Archers " << archersAttack<< std::endl;
+            std::cout << "Knights " << knightsAttack<<std::endl;
+            std::cout << "Wizards " << wizardsAttack<<std::endl;
+            std::cout << "Food Taken " << foodTaken<< std::endl;
+            std::cout << "Wood Taken " << woodTaken<<std::endl;
+            std::cout << "Gold Taken " << goldTaken<<std::endl;
+
+
+
+
+        } else {
+            std::cout << "Defender wins!" << std::endl;
+
+            //defense troops all killed
+            archersAttack = 0;
+            knightsAttack = 0;
+            wizardsAttack = 0;
+
+
+
+            while(archersDefense!=0){
+                if(attackPower==0){
+                    break;
+                }
+                attackPower -= 5;
+                archersDefense--;
+            }
+            while(knightsDefense!=0){
+                if(attackPower==0){
+                    break;
+                }
+                attackPower -= 10;
+                if(attackPower<0){
+                    break;
+                }
+                knightsDefense--;
+            }
+            while(wizardsDefense!=0){
+                if(attackPower==0){
+                    break;
+                }
+                attackPower -= 15;
+                if(attackPower<0){
+                    break;
+                }
+                wizardsDefense--;
+            }
+
+            std::cout << "Defence Archers " << archersDefense<< std::endl;
+            std::cout << "Defence Knights " << knightsDefense<<std::endl;
+            std::cout << "Defence Wizards " << wizardsDefense<<std::endl;
         }
 
         // Kill troops from both sides until total attack power of the opposing army is reached
-        int attackPower = 0;
-        int defensePower = 0;
-        for (auto attacker = troops.begin(); attacker != troops.end();) {
-            if (attackPower >= totalDefensePower) {
-                break;
-            }
-            attackPower += attacker->attack;
-            ++attacker;
-        }
-        for (auto defender = targetVillage.troops.begin(); defender != targetVillage.troops.end();) {
-            if (defensePower >= totalAttackPower) {
-                break;
-            }
-            defensePower += defender->attack;
-            ++defender;
-        }
-        int goldTaken = 0;
-        int foodTaken = 0;
-        int woodTaken = 0;
-        //Check if the attack was successful or not
-        if (!troops.empty()) {
-            // Attack was successful
-            targetVillage.health -= totalAttackPower;
-            int carryingCapacity = 0;
-            for (const auto &troop: troops) {
-                carryingCapacity += troop.amount * troop.carryingCapacity;
-            }
 
-            for (auto it = targetVillage.resources.begin(); it != targetVillage.resources.end();) {
-                if (carryingCapacity > 0) {
-                    if (it->type == "gold") goldTaken += it->amount;
-                    if (it->type == "food") foodTaken += it->amount;
-                    if (it->type == "wood") woodTaken += it->amount;
-                    carryingCapacity -= it->amount;
-                    it = targetVillage.resources.erase(it);
-                } else {
-                    break;
-                }
-            }
-            std::cout << "The attacker lost " << archersKilled << " archers, " << knightsKilled << " knights and "
-                      << wizardsKilled << " wizards." << std::endl;
-            std::cout << "The defender lost " << defenderArchersKilled << " archers, " << defenderKnightsKilled
-                      << " knights and " << defenderWizardsKilled << " wizards." << std::endl;
-            std::cout << "The attacker took " << goldTaken << " gold, " << foodTaken << " food and " << woodTaken
-                      << " wood." << std::endl;
-        }
+//        for (auto attacker = troops.begin(); attacker != troops.end();) {
+//            if (attackPower >= defensePower) {
+//                break;
+//            }
+//            attackPower += attacker->attack;
+//            ++attacker;
+//        }
+//        for (auto defender = targetVillage.troops.begin(); defender != targetVillage.troops.end();) {
+//            if (defensePower >= totalAttackPower) {
+//                break;
+//            }
+//            defensePower += defender->attack;
+//            ++defender;
+//        }
+//        int goldTaken = 0;
+//        int foodTaken = 0;
+//        int woodTaken = 0;
+//        //Check if the attack was successful or not
+//        if (!troops.empty()) {
+//            // Attack was successful
+//            targetVillage.health -= totalAttackPower;
+//            int carryingCapacity = 0;
+//            for (const auto &troop: troops) {
+//                carryingCapacity += troop.amount * troop.carryingCapacity;
+//            }
+//
+//            for (auto it = targetVillage.resources.begin(); it != targetVillage.resources.end();) {
+//                if (carryingCapacity > 0) {
+//                    if (it->type == "gold") goldTaken += it->amount;
+//                    if (it->type == "food") foodTaken += it->amount;
+//                    if (it->type == "wood") woodTaken += it->amount;
+//                    carryingCapacity -= it->amount;
+//                    it = targetVillage.resources.erase(it);
+//                } else {
+//                    break;
+//                }
+//            }
+//            std::cout << "The attacker lost " << archersKilled << " archers, " << knightsKilled << " knights and "
+//                      << wizardsKilled << " wizards." << std::endl;
+//            std::cout << "The defender lost " << defenderArchersKilled << " archers, " << defenderKnightsKilled
+//                      << " knights and " << defenderWizardsKilled << " wizards." << std::endl;
+//            std::cout << "The attacker took " << goldTaken << " gold, " << foodTaken << " food and " << woodTaken
+//                      << " wood." << std::endl;
+//        }
 
-        updateResourcesAndTroops(goldTaken, foodTaken, woodTaken, archersKilled, knightsKilled, wizardsKilled);
+        //updateResourcesAndTroops(goldTaken, foodTaken, woodTaken, archersKilled, knightsKilled, wizardsKilled);
     }
 
     void updateResourcesAndTroops(int gold, int food, int wood, int archersKilled, int knightsKilled, int wizardsKilled) {

@@ -79,9 +79,9 @@ int main() {
         map.addVillage(village, x, y);
 
 
-        players[i]->village->troops.emplace_back(Troop("Archer", 10, 5, 2, 2, 0));
-        players[i]->village->troops.emplace_back(Troop("Knight", 10, 10, 5, 6, 0));
-        players[i]->village->troops.emplace_back(Troop("Wizard", 10, 15, 10, 4, 0));
+        players[i]->village->troops.emplace_back(Troop("Archer", 10, 5, 2, 2, 4));
+        players[i]->village->troops.emplace_back(Troop("Knight", 10, 10, 5, 6, 2));
+        players[i]->village->troops.emplace_back(Troop("Wizard", 10, 15, 10, 4, 2));
 
         //Initialize Buildings
         for (const std::string &buildingType: buildingTypes) {
