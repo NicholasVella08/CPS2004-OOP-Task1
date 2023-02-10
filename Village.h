@@ -60,11 +60,12 @@ public:
     bool isMarching; // Whether or not the troops are currently marching
     std::vector<Resource> resources;
     std::vector<Troop> troops;
+    int movement = 3;
 
 
     // Constructor for the MarchingTroops class
-    MarchingTroops(const std::string& type, int health, int attack, int carryingCapacity, int marchingSpeed, int marchTime, int destinationX, int destinationY, int amount)
-            : Troop(type, health, attack, carryingCapacity, marchingSpeed, amount), Resource(type, amount), marchTime(marchTime), destinationX(destinationX), destinationY(destinationY), isMarching(true){}
+    MarchingTroops(const std::string& type, int health, int attack, int carryingCapacity, int marchingSpeed, int marchTime, int destinationX, int destinationY, int amount, int movement):
+                    Troop(type, health, attack, carryingCapacity, marchingSpeed, amount), Resource(type, amount), marchTime(marchTime), destinationX(destinationX), destinationY(destinationY), isMarching(true), movement(movement){}
 };
 
 class Village;
@@ -169,7 +170,7 @@ public:
 
 
     // Attack the given village with the given troops
-    void attack(Village &targetVillage, std::vector<Troop> &troops) {
+    std::vector<int> attack(Village &targetVillage, std::vector<Troop> &troops) {
         //int totalAttackPower = 0;
         int archersAttack = 0;
         int knightsAttack = 0;
@@ -298,8 +299,10 @@ public:
             std::cout << "Food Taken " << foodTaken<< std::endl;
             std::cout << "Wood Taken " << woodTaken<<std::endl;
             std::cout << "Gold Taken " << goldTaken<<std::endl;
-
-
+            std::vector<int> arr={goldTaken, foodTaken, woodTaken, archersAttack, knightsAttack, wizardsAttack, 1};
+            return arr;
+            //updateResourcesAndTroops(goldTaken, foodTaken, woodTaken, archersAttack, knightsAttack, wizardsAttack, 1);
+            //targetVillage.updateResourcesAndTroops(goldTaken, foodTaken, woodTaken, archersDefense, knightsDefense, wizardsDefense, 2);
 
 
         } else {
@@ -343,59 +346,15 @@ public:
             std::cout << "Defence Archers " << archersDefense<< std::endl;
             std::cout << "Defence Knights " << knightsDefense<<std::endl;
             std::cout << "Defence Wizards " << wizardsDefense<<std::endl;
+            //targetVillage.updateResourcesAndTroops(0, 0, 0, archersDefense, knightsDefense, wizardsDefense, 2);
+            std::vector<int> arr={0, 0, 0, archersDefense, knightsDefense, wizardsDefense, 2};
+            return arr;
         }
 
-        // Kill troops from both sides until total attack power of the opposing army is reached
 
-//        for (auto attacker = troops.begin(); attacker != troops.end();) {
-//            if (attackPower >= defensePower) {
-//                break;
-//            }
-//            attackPower += attacker->attack;
-//            ++attacker;
-//        }
-//        for (auto defender = targetVillage.troops.begin(); defender != targetVillage.troops.end();) {
-//            if (defensePower >= totalAttackPower) {
-//                break;
-//            }
-//            defensePower += defender->attack;
-//            ++defender;
-//        }
-//        int goldTaken = 0;
-//        int foodTaken = 0;
-//        int woodTaken = 0;
-//        //Check if the attack was successful or not
-//        if (!troops.empty()) {
-//            // Attack was successful
-//            targetVillage.health -= totalAttackPower;
-//            int carryingCapacity = 0;
-//            for (const auto &troop: troops) {
-//                carryingCapacity += troop.amount * troop.carryingCapacity;
-//            }
-//
-//            for (auto it = targetVillage.resources.begin(); it != targetVillage.resources.end();) {
-//                if (carryingCapacity > 0) {
-//                    if (it->type == "gold") goldTaken += it->amount;
-//                    if (it->type == "food") foodTaken += it->amount;
-//                    if (it->type == "wood") woodTaken += it->amount;
-//                    carryingCapacity -= it->amount;
-//                    it = targetVillage.resources.erase(it);
-//                } else {
-//                    break;
-//                }
-//            }
-//            std::cout << "The attacker lost " << archersKilled << " archers, " << knightsKilled << " knights and "
-//                      << wizardsKilled << " wizards." << std::endl;
-//            std::cout << "The defender lost " << defenderArchersKilled << " archers, " << defenderKnightsKilled
-//                      << " knights and " << defenderWizardsKilled << " wizards." << std::endl;
-//            std::cout << "The attacker took " << goldTaken << " gold, " << foodTaken << " food and " << woodTaken
-//                      << " wood." << std::endl;
-//        }
-
-        //updateResourcesAndTroops(goldTaken, foodTaken, woodTaken, archersKilled, knightsKilled, wizardsKilled);
     }
 
-    void updateResourcesAndTroops(int gold, int food, int wood, int archersKilled, int knightsKilled, int wizardsKilled) {
+    void updateResourcesAndTroops(int gold, int food, int wood, int archersKilled, int knightsKilled, int wizardsKilled, int movement) {
         for (auto &marchingTroops: marching) {
             for (auto &resource: marchingTroops.resources) {
                 if (resource.type == "Gold") {
@@ -415,60 +374,12 @@ public:
                     troop.amount += wizardsKilled;
                 }
             }
+            marchingTroops.movement = movement;
         }
     }
 
-    // Check if the village is under attack by enemy troops
-    bool isUnderAttack() const {
-        // Check if there are any incoming troops that have not yet arrive at the village
-        for (const Troop &troop: troops) {
-            if (troop.marchingSpeed > 0) {
-                return true;  // There is an incoming troop, so the village is under attack
-            }
-        }
-        return false;  // No incoming troops, so the village is not under attack
-    }
 
-    void resolveAttacks() {
-        // Check if the village is under attack
-        if (!isUnderAttack()) {
-            return;  // No attacks to resolve
-        }
 
-        // Calculate the total attack power of the defending troops
-        int totalDefendingPower = 0;
-        for (const Troop &troop: troops) {
-            totalDefendingPower += troop.attack;
-        }
-
-        // Loop through all incoming attacks and resolve them one by one
-        for (const auto &attack: incomingAttacks_) {
-            // Calculate the total attack power of the attacking troops
-            int totalAttackingPower = 0;
-            for (const Troop &troop: attack.second) {
-                totalAttackingPower += troop.attack;
-            }
-
-            // Check if the attack was successful (defending power is less than attacking power)
-            if (totalDefendingPower < totalAttackingPower) {
-                // Attack was successful:
-                // Transfer the ownership of the village to the attacker
-                owner = attack.first;
-
-                // Capture any resources in the village
-                attack.first->resources.insert(attack.first->resources.end(), resources.begin(), resources.end());
-
-                // Clear the resources of the captured village
-                resources.clear();
-            }
-
-            // Reduce the health of the defending village by the total attacking power
-            health = std::max(health - totalAttackingPower, 0);
-        }
-
-        // Clear all incoming attacks
-        incomingAttacks_.clear();
-    }
 
 // Earn resources according to the village's resource-generating buildings
     void earnResources() {
@@ -659,9 +570,9 @@ public:
         // Earn resources
         village->earnResources();
 
-        // Check if the village is under attack
-        village->resolveAttacks();
+
         int ready = 0;
+        std::vector<int> arr;
         do {
             // Decide on an action
             int action = dist(gen) % 3;
@@ -671,7 +582,22 @@ public:
                 // Attack a random village
                 Village *targetVillage = selectRandomVillage();
                 if (targetVillage != nullptr && targetVillage->owner != village->owner) {
-                    village->attack(*selectRandomVillage(), village->troops);
+
+
+                    arr = village->attack(*targetVillage, village->troops);
+                    for (int i = 0; i < 7; i++) {
+                        std::cout << arr[i] << " ";
+                    }
+                    if(arr[6]==1){
+                        village->updateResourcesAndTroops(arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6]);
+                        targetVillage->updateResourcesAndTroops(arr[0],arr[1],arr[2],0,0,0,2);
+
+                    }
+                    if(arr[6]==2){
+                        village->updateResourcesAndTroops(0,0,0,0,0,0,1);
+                        targetVillage->updateResourcesAndTroops(arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],2);
+
+                    }
                     ready = 1;
                 }
             } else if (action == 1) {

@@ -34,6 +34,7 @@ int main() {
     std::vector<Player*> players;
     std::vector<AI*> AIs;
     std::vector<Village> villages;
+    std::vector<MarchingTroops> marching;
     for (int i = 1; i <= numPlayers; i++) {
         std::string playerName;
         std::cout << "Enter the name of player " << i << ": ";
@@ -79,10 +80,14 @@ int main() {
         map.addVillage(village, x, y);
 
 
-        players[i]->village->troops.emplace_back(Troop("Archer", 10, 5, 2, 2, 4));
-        players[i]->village->troops.emplace_back(Troop("Knight", 10, 10, 5, 6, 2));
-        players[i]->village->troops.emplace_back(Troop("Wizard", 10, 15, 10, 4, 2));
+        players[i]->village->troops.emplace_back(Troop("Archer", 10, 5, 2, 2, 0));
+        players[i]->village->troops.emplace_back(Troop("Knight", 10, 10, 5, 6, 0));
+        players[i]->village->troops.emplace_back(Troop("Wizard", 10, 15, 10, 4, 0));
 
+        MarchingTroops marchingTroop("",0,0,0,0,0,0,0,0,3);
+        players[i]->village->marching.push_back(marchingTroop);
+
+        //players[i]->village->marching.emplace_back(MarchingTroops("",0,0,0,0,0,0,0,0,3));
         //Initialize Buildings
         for (const std::string &buildingType: buildingTypes) {
             players[i]->village->buildings.emplace_back(Building(buildingType, 0));
@@ -99,7 +104,7 @@ int main() {
 
 
     //std::vector<std::pair<int, int>> villageLocations;
-    std::cout << "start village mapping\n";
+    std::cout << "Start Village mapping\n";
     for (int i = 0; i < numAIs; i++) {
         int x, y;
         do {
@@ -161,8 +166,15 @@ int main() {
 
     Village *targetVillage = nullptr;
     std::vector<Troop> troops;
+    std::vector<int> arr;
 
     int round = 1;
+    int goldTaken = 0;
+    int foodTaken = 0;
+    int woodTaken = 0;
+    int archerReturned = 0;
+    int knightReturned = 0;
+    int wizardReturned = 0;
 
     // Game loop
     bool gameIsRunning = true;
@@ -174,22 +186,156 @@ int main() {
         for (auto &player : players) {
             std::cout << "Village of "<< player->name<<"\n";
 
-            //friendly troops arrival
+            goldTaken = 0;
+            foodTaken = 0;
+            woodTaken = 0;
+            archerReturned = 0;
+            knightReturned = 0;
+            wizardReturned = 0;
+
+            for (int i = 0; i < player->village->marching.size(); i++) {
+                int movement = player->village->marching[i].movement;
+
+                // Do something with the movement variable
+                //Friendly troops arrival
+                if(movement==1){
+                    if (!player->village->marching.empty()) {
+                        for (auto &marchingTroops: player->village->marching) {
+
+                            for (auto resource: marchingTroops.resources) {
+                                if (resource.type == "Gold") {
+                                    goldTaken = resource.amount;
+                                } else if (resource.type == "Food") {
+                                    foodTaken = resource.amount;
+                                } else if (resource.type == "Wood") {
+                                    woodTaken = resource.amount;
+                                }
+                            }
+                            for (auto &troop: marchingTroops.troops) {
+                                if (troop.type == "Archer") {
+                                    archerReturned = troop.amount;
+                                } else if (troop.type == "Knight") {
+                                    knightReturned = troop.amount;
+                                } else if (troop.type == "Wizard") {
+                                    wizardReturned = troop.amount;
+                                }
+                            }
+                            marchingTroops.movement=3;
+                        }
+                    }
+
+                    for (Troop &troop : player->village->troops) {
+                        if (troop.type == "Archer") {
+                            troop.amount += archerReturned;
+                            break;
+                        }
+                    }
+                    for (Troop &troop : player->village->troops) {
+                        if (troop.type == "Knight") {
+                            troop.amount += knightReturned;
+                            break;
+                        }
+                    }
+                    for (Troop &troop : player->village->troops) {
+                        if (troop.type == "Wizard") {
+                            troop.amount += wizardReturned;
+                            break;
+                        }
+                    }
+                    for ( Resource resource : player->village->resources) {
+                        if (resource.type == "Food") {
+                            resource.amount += foodTaken;
+                            break;
+                        }
+                    }
+                    for ( Resource resource : player->village->resources) {
+                        if (resource.type == "Wood") {
+                            resource.amount += woodTaken;
+                            break;
+                        }
+                    }
+                    for ( Resource resource : player->village->resources) {
+                        if (resource.type == "Gold") {
+                            resource.amount += goldTaken;
+                            break;
+                        }
+                    }
+
+                }
+
+                //enemy troops arrival
+                if(movement==2){
+
+                    for (auto marchingTroops: player->village->marching) {
+                        for (auto resource: marchingTroops.resources) {
+                            if (resource.type == "Gold") {
+                                goldTaken += resource.amount;
+                            } else if (resource.type == "Food") {
+                                foodTaken += resource.amount;
+                            } else if (resource.type == "Wood") {
+                                woodTaken += resource.amount;
+                            }
+                        }
+                        for (auto troop: marchingTroops.troops) {
+                            if (troop.type == "Archer") {
+                                archerReturned += troop.amount;
+                            } else if (troop.type == "Knight") {
+                                knightReturned += troop.amount;
+                            } else if (troop.type == "Wizard") {
+                                wizardReturned += troop.amount;
+                            }
+                        }
+                        marchingTroops.movement=3;
+                    }
 
 
+                    for (Troop &troop : player->village->troops) {
+                        if (troop.type == "Archer") {
+                            troop.amount = 0;
+                            troop.amount += archerReturned;
+                            break;
+                        }
+                    }
+                    for (Troop &troop : player->village->troops) {
+                        if (troop.type == "Knight") {
+                            troop.amount = 0;
+                            troop.amount += knightReturned;
+                            break;
+                        }
+                    }
+                    for (Troop &troop : player->village->troops) {
+                        if (troop.type == "Wizard") {
+                            troop.amount = 0;
+                            troop.amount += wizardReturned;
+                            break;
+                        }
+                    }
+                    for ( Resource resource : player->village->resources) {
+                        if (resource.type == "Food") {
+                            resource.amount -= foodTaken;
+                            break;
+                        }
+                    }
+                    for ( Resource resource : player->village->resources) {
+                        if (resource.type == "Wood") {
+                            resource.amount -= woodTaken;
+                            break;
+                        }
+                    }
+                    for ( Resource resource : player->village->resources) {
+                        if (resource.type == "Gold") {
+                            resource.amount -= goldTaken;
+                            break;
+                        }
+                    }
 
+                }
+            }
 
-
-            //enemy troops arival
-
-
-
-
+            //Earn resources
             if(player && player->village)
                 player->village->earnResources();
                 std::cout << "Resource earned from buildings\n";
-
-
 
             //want to output all resources and troops;
 
@@ -203,28 +349,25 @@ int main() {
             goldMineLevel = 0;
             lumberMillLevel = 0;
 
-
-
             for (const Resource &resource : player->village->resources) {
                 if (resource.type == "Food") {
                     foodAmount = resource.amount;
                     break;
                 }
             }
-
             for (const Resource &resource : player->village->resources) {
                 if (resource.type == "Gold") {
                     goldAmount = resource.amount;
                     break;
                 }
             }
-
             for (const Resource &resource : player->village->resources) {
                 if (resource.type == "Wood") {
                     woodAmount = resource.amount;
                     break;
                 }
             }
+
             for (const Troop &troop : player->village->troops) {
                 if (troop.type == "Archer") {
                     archerAmount = troop.amount;
@@ -250,16 +393,12 @@ int main() {
                     break;
                 }
             }
-
-
             for (const Building& building : player->village->buildings) {
                 if (building.type == "Gold Mine") {
                     goldMineLevel = building.level;
                     break;
                 }
             }
-
-
             for (const Building& building : player->village->buildings) {
                 if (building.type == "Lumber Mill") {
                     lumberMillLevel = building.level;
@@ -413,20 +552,83 @@ int main() {
                         }while(correct == false);
 
 
-                            for (int i = 0; i < numArchers; i++) {
-                                troops.push_back(Troop("Archer", 100, 5, 2, 2, numArchers));
+                        troops.push_back(Troop("Archer", 100, 5, 2, 2, numArchers));
+                        troops.push_back(Troop("Wizard", 100, 15, 10, 4, numWizards));
+                        troops.push_back(Troop("Knight", 100, 10, 5, 6, numKnights));
+
+
+                        for (Troop &troop : player->village->troops) {
+                            if (troop.type == "Archer") {
+                                troop.amount -= numArchers;
+                                break;
                             }
-                            for (int i = 0; i < numWizards; i++) {
-                                troops.push_back(Troop("Wizard", 100, 15, 10, 4, numWizards));
+                        }
+                        for (Troop &troop : player->village->troops) {
+                            if (troop.type == "Knight") {
+                                troop.amount -= numKnights;
+                                break;
                             }
-                            for (int i = 0; i < numKnights; i++) {
-                                troops.push_back(Troop("Knight", 100, 10, 5, 6, numKnights));
+                        }
+                        for (Troop &troop : player->village->troops) {
+                            if (troop.type == "Wizard") {
+                                troop.amount -= numWizards;
+                                break;
+                            }
+                        }
+                        // Now you can call the attack method
+                        if(player->village != targetVillage){
+                            arr = player->village->attack(*targetVillage, troops);
+                        }else{
+                            std::cout<<"You can't attack your own Village.\n";
+                            turn=false;
+                            break;
+                        }
+
+                        for (int i = 0; i < 7; i++) {
+                            std::cout << arr[i] << " ";
+                        }
+                        if(arr[6]==1){
+                            player->village->updateResourcesAndTroops(arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6]);
+
+                            for (const auto &player : players) {
+                                if (player->village->x == x && player->village->y == y) {
+                                    player->village->updateResourcesAndTroops(arr[0],arr[1],arr[2],0,0,0,2);
+                                    break;
+                                }
+
                             }
 
-                            // Now you can call the attack method
-                            player->village->attack(*targetVillage, troops);
-                            turn=true;
-                            break;
+                            for (const auto &aiplayer : AIs) {
+                                if (aiplayer->village->x == x && aiplayer->village->y == y) {
+                                    aiplayer->village->updateResourcesAndTroops(arr[0],arr[1],arr[2],0,0,0,2);
+                                    break;
+                                }
+
+                            }
+                        }
+                        if(arr[6]==2){
+                            player->village->updateResourcesAndTroops(0,0,0,0,0,0,1);
+
+                            for (const auto &player : players) {
+                                if (player->village->x == x && player->village->y == y) {
+                                    player->village->updateResourcesAndTroops(arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],2);
+                                    break;
+                                }
+
+                            }
+
+                            for (const auto &aiplayer : AIs) {
+                                if (aiplayer->village->x == x && aiplayer->village->y == y) {
+                                    aiplayer->village->updateResourcesAndTroops(arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],2);
+                                    break;
+                                }
+
+                            }
+                        }
+
+
+                        turn=true;
+                        break;
 
 
                     case 4:
@@ -470,7 +672,151 @@ int main() {
             goldMineLevel = 0;
             lumberMillLevel = 0;
 
+            goldTaken = 0;
+            foodTaken = 0;
+            woodTaken = 0;
+            archerReturned = 0;
+            knightReturned = 0;
+            wizardReturned = 0;
 
+            for (int i = 0; i < aiPlayer->village->marching.size(); i++) {
+                int movement = aiPlayer->village->marching[i].movement;
+
+                // Do something with the movement variable
+                //Friendly troops arrival
+                if(movement==1){
+                    if (!aiPlayer->village->marching.empty()) {
+                        for (auto &marchingTroops: aiPlayer->village->marching) {
+
+                            for (auto resource: marchingTroops.resources) {
+                                if (resource.type == "Gold") {
+                                    goldTaken = resource.amount;
+                                } else if (resource.type == "Food") {
+                                    foodTaken = resource.amount;
+                                } else if (resource.type == "Wood") {
+                                    woodTaken = resource.amount;
+                                }
+                            }
+                            for (auto &troop: marchingTroops.troops) {
+                                if (troop.type == "Archer") {
+                                    archerReturned = troop.amount;
+                                } else if (troop.type == "Knight") {
+                                    knightReturned = troop.amount;
+                                } else if (troop.type == "Wizard") {
+                                    wizardReturned = troop.amount;
+                                }
+                            }
+                            marchingTroops.movement=3;
+                        }
+                    }
+
+                    for (Troop &troop : aiPlayer->village->troops) {
+                        if (troop.type == "Archer") {
+                            troop.amount += archerReturned;
+                            break;
+                        }
+                    }
+                    for (Troop &troop : aiPlayer->village->troops) {
+                        if (troop.type == "Knight") {
+                            troop.amount += knightReturned;
+                            break;
+                        }
+                    }
+                    for (Troop &troop : aiPlayer->village->troops) {
+                        if (troop.type == "Wizard") {
+                            troop.amount += wizardReturned;
+                            break;
+                        }
+                    }
+                    for ( Resource resource : aiPlayer->village->resources) {
+                        if (resource.type == "Food") {
+                            resource.amount += foodTaken;
+                            break;
+                        }
+                    }
+                    for ( Resource resource : aiPlayer->village->resources) {
+                        if (resource.type == "Wood") {
+                            resource.amount += woodTaken;
+                            break;
+                        }
+                    }
+                    for ( Resource resource : aiPlayer->village->resources) {
+                        if (resource.type == "Gold") {
+                            resource.amount += goldTaken;
+                            break;
+                        }
+                    }
+
+                }
+
+                //enemy troops arrival
+                if(movement==2){
+
+                    for (auto marchingTroops: aiPlayer->village->marching) {
+                        for (auto resource: marchingTroops.resources) {
+                            if (resource.type == "Gold") {
+                                goldTaken += resource.amount;
+                            } else if (resource.type == "Food") {
+                                foodTaken += resource.amount;
+                            } else if (resource.type == "Wood") {
+                                woodTaken += resource.amount;
+                            }
+                        }
+                        for (auto troop: marchingTroops.troops) {
+                            if (troop.type == "Archer") {
+                                archerReturned += troop.amount;
+                            } else if (troop.type == "Knight") {
+                                knightReturned += troop.amount;
+                            } else if (troop.type == "Wizard") {
+                                wizardReturned += troop.amount;
+                            }
+                        }
+                        marchingTroops.movement=3;
+                    }
+
+
+                    for (Troop &troop : aiPlayer->village->troops) {
+                        if (troop.type == "Archer") {
+                            troop.amount = 0;
+                            troop.amount += archerReturned;
+                            break;
+                        }
+                    }
+                    for (Troop &troop : aiPlayer->village->troops) {
+                        if (troop.type == "Knight") {
+                            troop.amount = 0;
+                            troop.amount += knightReturned;
+                            break;
+                        }
+                    }
+                    for (Troop &troop : aiPlayer->village->troops) {
+                        if (troop.type == "Wizard") {
+                            troop.amount = 0;
+                            troop.amount += wizardReturned;
+                            break;
+                        }
+                    }
+                    for ( Resource resource : aiPlayer->village->resources) {
+                        if (resource.type == "Food") {
+                            resource.amount -= foodTaken;
+                            break;
+                        }
+                    }
+                    for ( Resource resource : aiPlayer->village->resources) {
+                        if (resource.type == "Wood") {
+                            resource.amount -= woodTaken;
+                            break;
+                        }
+                    }
+                    for ( Resource resource : aiPlayer->village->resources) {
+                        if (resource.type == "Gold") {
+                            resource.amount -= goldTaken;
+                            break;
+                        }
+                    }
+
+                }
+            }
 
             for (const Resource &resource : aiPlayer->village->resources) {
                 if (resource.type == "Food") {
@@ -492,13 +838,27 @@ int main() {
                     break;
                 }
             }
-            std::cout <<"\n============================";
-            std::cout << "\nTotal Food: "<<foodAmount;
-            std::cout << "\nTotal Gold: "<<goldAmount;
-            std::cout << "\nTotal Wood: "<<woodAmount<<"\n";
 
+            for (const Troop &troop : aiPlayer->village->troops) {
+                if (troop.type == "Archer") {
+                    archerAmount = troop.amount;
+                    break;
+                }
+            }
 
+            for (const Troop &troop : aiPlayer->village->troops) {
+                if (troop.type == "Knight") {
+                    knightAmount = troop.amount;
+                    break;
+                }
+            }
 
+            for (const Troop &troop : aiPlayer->village->troops) {
+                if (troop.type == "Wizard") {
+                    wizardAmount = troop.amount;
+                    break;
+                }
+            }
 
             for (const Building& building : aiPlayer->village->buildings) {
                 if (building.type == "Farm") {
@@ -507,14 +867,12 @@ int main() {
                 }
             }
 
-
             for (const Building& building : aiPlayer->village->buildings) {
                 if (building.type == "Gold Mine") {
                     goldMineLevel = building.level;
                     break;
                 }
             }
-
 
             for (const Building& building : aiPlayer->village->buildings) {
                 if (building.type == "Lumber Mill") {
@@ -523,11 +881,17 @@ int main() {
                 }
             }
 
+            std::cout <<"\n============================";
+            std::cout << "\nTotal Food: "<<foodAmount;
+            std::cout << "\nTotal Gold: "<<goldAmount;
+            std::cout << "\nTotal Wood: "<<woodAmount<<"\n";
 
             std::cout << "----------------------\n";
-            for (const Troop &troop : aiPlayer->village->troops) {
-                std::cout << "Total " << troop.type << " : " << troop.amount << std::endl;
-            }
+            std::cout << "\nTotal Archers: "<<archerAmount;
+            std::cout << "\nTotal Knights: "<<knightAmount;
+            std::cout << "\nTotal Wizards: "<<wizardAmount<<"\n";
+
+
             std::cout << "----------------------\n";
             std::cout << "\nLevel of Farm: "<<farmLevel;
             std::cout << "\nLevel of Gold Mine: "<<goldMineLevel;
