@@ -97,7 +97,7 @@ public:
     std::vector<Building> buildings;  // The buildings in the village
     std::vector<Troop> troops;  // The troops stationed in the village
     std::vector<MarchingTroops> marching;
-    std::vector<std::pair<Player *, std::vector<Troop>>> incomingAttacks_;
+    //std::vector<std::pair<Player *, std::vector<Troop>>> incomingAttacks_;
 
 
     // Default constructor for the Village class
@@ -167,7 +167,6 @@ public:
         return true;
 
     }
-
 
     // Attack the given village with the given troops
     std::vector<int> attack(Village &targetVillage, std::vector<Troop> &troops) {
@@ -378,10 +377,7 @@ public:
         }
     }
 
-
-
-
-// Earn resources according to the village's resource-generating buildings
+    // Earn resources according to the village's resource-generating buildings
     void earnResources() {
         // Check if the village has any resource-generating buildings
         if (buildings.empty()) {

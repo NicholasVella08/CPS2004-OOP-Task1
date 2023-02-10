@@ -419,6 +419,21 @@ int main() {
             std::cout << "\nLevel of Gold Mine: "<<goldMineLevel;
             std::cout << "\nLevel of Lumber MIll: "<<lumberMillLevel;
             std::cout << "\n######################\n\n";
+            //if there are no resources and troops the village is destroyed
+            if(foodAmount+goldAmount+woodAmount+archerAmount+knightAmount+wizardAmount == 0){
+                map.removeVillage(player->village);
+                std::cout << "Village of " << player << "has been distroyed\n";
+                turn = true;
+                deletePlayer = true;
+                if (deletePlayer==true) {
+                    auto playerIter = std::find(players.begin(), players.end(), player);
+                    if (playerIter != players.end()) {
+                        delete *playerIter;
+                        players.erase(playerIter);
+                    }
+                }
+                turn= true;
+            }
 
             do{
 
@@ -584,9 +599,9 @@ int main() {
                             break;
                         }
 
-                        for (int i = 0; i < 7; i++) {
-                            std::cout << arr[i] << " ";
-                        }
+//                        for (int i = 0; i < 7; i++) {
+//                            std::cout << arr[i] << " ";
+//                        }
                         if(arr[6]==1){
                             player->village->updateResourcesAndTroops(arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6]);
 
@@ -897,6 +912,22 @@ int main() {
             std::cout << "\nLevel of Gold Mine: "<<goldMineLevel;
             std::cout << "\nLevel of Lumber MIll: "<<lumberMillLevel;
             std::cout << "\n######################\n\n";
+
+            //if there are no resources and troops the village is destroyed
+            if(foodAmount+goldAmount+woodAmount+archerAmount+knightAmount+wizardAmount == 0){
+                map.removeVillage(aiPlayer->village);
+                std::cout << "Village of " << aiPlayer << "has been distroyed\n";
+                turn = true;
+                deletePlayer = true;
+                if (deletePlayer==true) {
+                    auto playerIter = std::find(AIs.begin(), AIs.end(), aiPlayer);
+                    if (playerIter != AIs.end()) {
+                        delete *playerIter;
+                        AIs.erase(playerIter);
+                    }
+                }
+
+            }
             aiPlayer->takeTurn();
         }
 
