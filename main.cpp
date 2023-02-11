@@ -205,19 +205,25 @@ int main() {
                             for (auto resource: marchingTroops.resources) {
                                 if (resource.type == "Gold") {
                                     goldTaken = resource.amount;
+                                    resource.amount = 0;
                                 } else if (resource.type == "Food") {
                                     foodTaken = resource.amount;
+                                    resource.amount = 0;
                                 } else if (resource.type == "Wood") {
                                     woodTaken = resource.amount;
+                                    resource.amount = 0;
                                 }
                             }
                             for (auto &troop: marchingTroops.troops) {
                                 if (troop.type == "Archer") {
                                     archerReturned = troop.amount;
+                                    troop.amount = 0;
                                 } else if (troop.type == "Knight") {
                                     knightReturned = troop.amount;
+                                    troop.amount = 0;
                                 } else if (troop.type == "Wizard") {
                                     wizardReturned = troop.amount;
+                                    troop.amount = 0;
                                 }
                             }
                             marchingTroops.movement=3;
@@ -270,19 +276,25 @@ int main() {
                         for (auto resource: marchingTroops.resources) {
                             if (resource.type == "Gold") {
                                 goldTaken += resource.amount;
+                                resource.amount = 0;
                             } else if (resource.type == "Food") {
                                 foodTaken += resource.amount;
+                                resource.amount = 0;
                             } else if (resource.type == "Wood") {
                                 woodTaken += resource.amount;
+                                resource.amount = 0;
                             }
                         }
                         for (auto troop: marchingTroops.troops) {
                             if (troop.type == "Archer") {
                                 archerReturned += troop.amount;
+                                troop.amount = 0;
                             } else if (troop.type == "Knight") {
                                 knightReturned += troop.amount;
+                                troop.amount = 0;
                             } else if (troop.type == "Wizard") {
                                 wizardReturned += troop.amount;
+                                troop.amount = 0;
                             }
                         }
                         marchingTroops.movement=3;
@@ -706,19 +718,25 @@ int main() {
                             for (auto resource: marchingTroops.resources) {
                                 if (resource.type == "Gold") {
                                     goldTaken = resource.amount;
+                                    resource.amount = 0;
                                 } else if (resource.type == "Food") {
                                     foodTaken = resource.amount;
+                                    resource.amount = 0;
                                 } else if (resource.type == "Wood") {
                                     woodTaken = resource.amount;
+                                    resource.amount = 0;
                                 }
                             }
                             for (auto &troop: marchingTroops.troops) {
                                 if (troop.type == "Archer") {
                                     archerReturned = troop.amount;
+                                    troop.amount = 0;
                                 } else if (troop.type == "Knight") {
                                     knightReturned = troop.amount;
+                                    troop.amount = 0;
                                 } else if (troop.type == "Wizard") {
                                     wizardReturned = troop.amount;
+                                    troop.amount = 0;
                                 }
                             }
                             marchingTroops.movement=3;
@@ -771,19 +789,25 @@ int main() {
                         for (auto resource: marchingTroops.resources) {
                             if (resource.type == "Gold") {
                                 goldTaken += resource.amount;
+                                resource.amount = 0;
                             } else if (resource.type == "Food") {
                                 foodTaken += resource.amount;
+                                resource.amount = 0;
                             } else if (resource.type == "Wood") {
                                 woodTaken += resource.amount;
+                                resource.amount = 0;
                             }
                         }
                         for (auto troop: marchingTroops.troops) {
                             if (troop.type == "Archer") {
                                 archerReturned += troop.amount;
+                                troop.amount = 0;
                             } else if (troop.type == "Knight") {
                                 knightReturned += troop.amount;
+                                troop.amount = 0;
                             } else if (troop.type == "Wizard") {
                                 wizardReturned += troop.amount;
+                                troop.amount = 0;
                             }
                         }
                         marchingTroops.movement=3;
