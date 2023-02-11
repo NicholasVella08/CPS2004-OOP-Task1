@@ -184,7 +184,7 @@ int main() {
 
 
         for (auto &player : players) {
-            std::cout << "Village of "<< player->name<<"\n";
+            std::cout << "\nVillage of "<< player->name<<"\n";
 
             goldTaken = 0;
             foodTaken = 0;
